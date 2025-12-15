@@ -1,0 +1,10 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('',views.IndexView.as_view(),name='home'),
+    path('konveyer/<int:id>/',views.KonveyerView.as_view(),name='konveyer'),
+    path('create_loan/',views.create_request,name='create_loan'),
+    path('save_data/',views.save_data,name='save_data'),
+    path('add_client/',views.add_client,name='add_client')
+]

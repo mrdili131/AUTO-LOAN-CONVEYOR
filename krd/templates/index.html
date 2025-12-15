@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lisa Kredit Konveyeri</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+    --primary:#0f6b3d;
+    --bg:#f4f6f8;
+    --card-bg:#fff;
+    --border:#dcdfe4;
+}
+*{box-sizing:border-box;font-family:Inter;margin:0;padding:0}
+body{background:var(--bg)}
+nav{background:var(--primary);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+nav h1 a{color:#fff;text-decoration:none}
+nav select{padding:8px;border-radius:8px;border:none;font-size:14px;cursor:pointer}
+nav a.user{color:#fff;text-decoration:none;font-weight:500}
+.main{padding:24px}
+.box-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.box{background:var(--card-bg);padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.05);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:0.2s;cursor:pointer;text-align:center}
+.box:hover{box-shadow:0 6px 18px rgba(0,0,0,0.1)}
+.box h2{margin-bottom:12px;color:var(--primary)}
+.box p{color:#333;font-size:14px}
+.empty{font-size:18px;color:#555;text-align:center;padding:40px;background:#fff;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.05)}
+</style>
+</head>
+<body>
+
+<nav>
+    <h1><a href="/">AKRD - Auto Kreditor</a></h1>
+    <select onchange="navigate(this)">
+        <option value="/">-------------------</option>
+        <option value="/create_loan">Arizani yuborish</option>
+        <option value="/">Arizalar tarixi</option>
+    </select>
+    <a href="#" class="user">{{ user.full_name }}</a>
+</nav>
+
+<main class="main">
+    <div class="box-container">
+        <!-- Example boxes -->
+        <div class="box">
+            <h2>Yangi Ariza</h2>
+            <p>Yangi kredit arizasi yaratish</p>
+        </div>
+        <div class="box">
+            <h2>Arizalar Tarixi</h2>
+            <p>Barcha arizalarni ko‘rish</p>
+        </div>
+        <div class="box empty">
+            <h2>Vazifalar yo‘q</h2>
+            <p>Hozircha bajariladigan vazifalar mavjud emas</p>
+        </div>
+    </div>
+</main>
+
+<script>
+function navigate(sel){
+    if(sel.value) window.location.href = sel.value;
+}
+
+
+
+</script>
+
+</body>
+</html>

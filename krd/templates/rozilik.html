@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIZENDOC</title>
+</head>
+<body>
+    <div class="paper">
+        <div class="board">
+            <h3 class="top-right">Fuqaro "ISM FAMILIYA OTECHESTVO"dan<br>JSHSHIR raqami: "PINFL / JSHSHIR"
+            </h3>
+
+            <br><br>
+            <h1>Rozilik xati</h1>
+                <p>
+                    "TASHKILOT_NOMI"ning "BIRNIMA" filiali tomonidan menga ajratilgan "SHARTNOMA RAQAMI" sonli kredit shartnomasining 
+                    to‘lov grafigi bo‘yicha to‘lovlar men tomonimdan o‘z vaqtida amalga oshirilmagan taqdirda, muddati o‘tgan qarizdorlikni 
+                    undirish yuzasidan tashkilot xodimlari tomonidan men bilan o‘zaro munosabatga kirishishining barcha turdagi 
+                    qo‘llangan xolda men bilan o‘zaro munosabatga kirishishlariga , men bilan bog‘lanish imkoni bo‘lmagan hollarda, men 
+                    tomonimdan taqdim etilgan meni tanigan-bilgan uchinchi shaxslarga aloqaga chiqishlariga kredit qarzdorlikni to‘liq 
+                    so‘ndirilgunigacha bo‘lgan davrada ruxsat beraman.
+                </p>
+                <br><br>
+                <div class="left" style="margin-top: 600px;">
+                    <h3>Kredit oluvchi:__________ BIRNIMAYEVA B.K.</h3>
+                    <h3>Sana: 13.12.2025</h3>
+                </div>
+        </div>
+    </div>
+    <div class="info">
+        <h1>Nomi: Rozilik xati</h1>
+        <p>Hujjat turi: Kreditlash hujjati</p>
+        <button onclick="editable()">Taxrirlash</button>
+        <button onclick="window.print()">Chiqarish</button>
+    </div>
+</body>
+</html>
+
+<style>
+    *{
+        
+    }
+    body{
+        background-color: rgb(224, 224, 224);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap:50px;
+    }
+    .paper{
+        background-color: white;
+        border:1px solid black;
+        width:210mm;
+        height: 297mm;
+        border: 1px solid black;
+        font-size: 12pt;
+        line-height: 1.4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+        font-family:'Times New Roman', Times, serif;
+    }
+    .board{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 60px;
+        font-size: 15px;
+    }
+    .info{
+        background-color: rgb(255, 255, 255);
+        padding: 15px;
+        border-radius: 12px;
+        font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+    }
+    h1, h2, p{
+        page-break-inside: avoid;
+        word-wrap: brea;
+        overflow-wrap: break-word;
+    }
+
+    table{
+        border:1px solid gray;
+        border-radius: 13px;
+        padding: 10px;
+        background-color: rgb(248, 248, 248);
+        font-size: 20px;
+    }
+    .title{
+        background-color: rgb(0, 0, 0);
+        color: white;
+    }
+    td{
+        border: 1px solid gray;
+        padding: 5px;
+    }
+
+    .top-right{
+        top:30px;
+        right:60px;
+        position: absolute;
+        text-align: right;
+    }
+    .left{
+        position:absolute;
+        left: 60px;
+        bottom: 650px;
+        text-align: left;
+    }
+
+    @media print {
+        @page{
+            size: A4 portrait;
+            margin: 0;
+        }
+        body * {
+            visibility: hidden;
+        }
+        body{
+            margin: 0;
+            padding: 0;
+            display: block;
+            background:white;
+        }
+        .paper, .paper *{
+            visibility: visible;
+        }
+        .board{
+            visibility: visible;
+        }
+        .paper{
+            border: none;
+            position: static;
+        }
+    }
+</style>
+
+<script>
+    function editable(){
+        document.querySelector(".paper").setAttribute("contenteditable","true")
+    }
+</script>

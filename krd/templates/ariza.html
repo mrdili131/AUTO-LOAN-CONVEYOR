@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arizalar Tarixi – ALS</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+    --primary:#0f6b3d;
+    --bg:#f4f6f8;
+    --card-bg:#fff;
+    --border:#dcdfe4;
+}
+*{box-sizing:border-box;font-family:Inter;margin:0;padding:0}
+body{background:var(--bg)}
+nav{background:var(--primary);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+nav h1 a{color:#fff;text-decoration:none}
+nav select{padding:8px;border-radius:8px;border:none;font-size:14px;cursor:pointer}
+nav a.user{color:#fff;text-decoration:none;font-weight:500}
+.main{padding:24px}
+.card{background:var(--card-bg);padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.05);margin-bottom:20px}
+.search-bar{margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap}
+.search-bar input{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border)}
+.search-bar button{padding:10px 20px;background:var(--primary);color:#fff;border:none;border-radius:12px;cursor:pointer}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{background:#f0f0f0;color:#333}
+tr:hover{background:#eef2f3}
+.view-btn{padding:6px 12px;background:#0f6b3d;color:#fff;border:none;border-radius:8px;cursor:pointer}
+.no-data{text-align:center;color:#555;padding:20px}
+</style>
+</head>
+<body>
+
+<nav>
+    <h1><a href="/">AKRD - Auto Kreditor</a></h1>
+    <select onchange="navigate(this)">
+        <option value="/">-------------------</option>
+        <option value="/new-application">Arizani yuborish</option>
+        <option value="/applications-history">Arizalar tarixi</option>
+    </select>
+    <a href="#" class="user">{{ user.full_name }}</a>
+</nav>
+
+<main class="main">
+    <div class="card">
+        <h2>Arizalar Tarixi</h2>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="PINFL yoki Ism bo‘yicha izlash">
+            <button onclick="searchTable()">Qidirish</button>
+        </div>
+
+        <table id="historyTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Mijoz F.I.O</th>
+                    <th>PINFL</th>
+                    <th>Mahsulot</th>
+                    <th>Jami summa</th>
+                    <th>Status</th>
+                    <th>Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Example static data -->
+                <tr>
+                    <td>1</td>
+                    <td>Somov Somjon</td>
+                    <td>12345678901234</td>
+                    <td>Toyota Camry</td>
+                    <td>3,900,000 so‘m</td>
+                    <td>Tasdiqlangan</td>
+                    <td><button class="view-btn" onclick="viewRequest(1)">View</button></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Aliyev Ali</td>
+                    <td>23456789012345</td>
+                    <td>Lada Granta</td>
+                    <td>2,500,000 so‘m</td>
+                    <td>Jarayonda</td>
+                    <td><button class="view-btn" onclick="viewRequest(2)">View</button></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Karimov Jamshid</td>
+                    <td>34567890123456</td>
+                    <td>Hyundai Accent</td>
+                    <td>3,200,000 so‘m</td>
+                    <td>Rad etilgan</td>
+                    <td><button class="view-btn" onclick="viewRequest(3)">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p id="noData" class="no-data" style="display:none;">Hech qanday ariza topilmadi.</p>
+    </div>
+</main>
+
+<script>
+function navigate(sel){
+    if(sel.value) window.location.href = sel.value;
+}
+
+// ===== SEARCH FUNCTION =====
+function searchTable(){
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const table = document.getElementById("historyTable");
+    const rows = table.getElementsByTagName("tr");
+    let visibleCount = 0;
+
+    for(let i=1;i<rows.length;i++){
+        const cells = rows[i].getElementsByTagName("td");
+        let match = false;
+        for(let j=1;j<=2;j++){ // F.I.O or PINFL
+            if(cells[j].innerText.toLowerCase().includes(input)){
+                match = true;
+                break;
+            }
+        }
+        rows[i].style.display = match ? "" : "none";
+        if(match) visibleCount++;
+    }
+
+    document.getElementById("noData").style.display = visibleCount===0 ? "block" : "none";
+}
+
+// ===== VIEW REQUEST =====
+function viewRequest(id){
+    // Here you can navigate to detail page
+    // e.g., /application/1
+    window.location.href = `/application/${id}`;
+}
+</script>
+
+</body>
+</html>

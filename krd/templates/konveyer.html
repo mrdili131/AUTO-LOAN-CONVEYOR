@@ -1,0 +1,408 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALS – Auto Loan System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+<!-- ================= TOP BAR ================= -->
+<header class="topbar">
+    <div>
+        <h1>LISA - LOAN CONVEYOR</h1>
+        <span class="subtitle">LISA CONVEYOR BY DIZENSTUDIOS</span>
+    </div>
+    <div class="user-box">{{ user.full_name }}</div>
+</header>
+
+<!-- ================= STEPS ================= -->
+<nav class="steps">
+    <button class="step">1. Mahsulot</button>
+    <button class="step">2. Mijoz</button>
+    <button class="step">3. Raqamlar</button>
+    <button class="step">4. Tasdiqlash</button>
+    <button class="step">5. Hujjatlar</button>
+    <button class="step">6. Yakunlash</button>
+</nav>
+
+<!-- ================= ALERTS ================= -->
+<div id="alerts"></div>
+
+<!-- ================= CONTENT ================= -->
+<main class="container">
+
+<!-- ===== TAB 1 ===== -->
+<section class="tab">
+<h2>Mahsulot ma’lumotlari</h2>
+<div class="card grid-2">
+    <div class="field">
+        <label>Mahsulot</label>
+        <select id="product">
+            {% for i in products%}
+            <option value="{{i.id}}">{{ i.name }}</option>
+            {% endfor %}
+        </select>
+        <button class="primary" onclick="spawnAlert('Maxsulot saqlandi!','info')">Saqlash</button>
+    </div>
+    <div class="field">
+        <label>Asl narxi</label>
+        <input id="price" readonly value="{{ loan.product.price }}">
+    </div>
+    <div class="field">
+        <label>Yillik foiz (%)</label>
+        <input id="loan_rate" value="{{ loan.rate }}">
+    </div>
+    <div class="field">
+        <label>Foiz bilan jami summa</label>
+        <input id="amount" readonly value="{{ loan.amount }}">
+    </div>
+    <div class="field">
+        <label>Boshlanish sanasi</label>
+        <input id="loan_start_date" type="date" readonly value="{{ loan.start_date|date:'Y-m-d' }}">
+    </div>
+    <div class="field">
+        <label>Tugash sanasi</label>
+        <input id="loan_end_date" type="date" value="{{ loan.end_date|date:'Y-m-d' }}">
+    </div>
+    <div class="field">
+        <label>Oylik to‘lov</label>
+        <input id="monthly_payment" readonly>
+    </div>
+    <div class="field">
+        <button class="primary" onclick="calculateMonthlyPayment()">Grafikni tuzish</button>
+    </div>
+</div>
+</section>
+
+<!-- ===== TAB 2 ===== -->
+<section class="tab">
+<h2>Mijoz ma’lumotlari</h2>
+<div class="card grid-3">
+
+    <!-- PINFL first -->
+    <div class="field">
+        <label>PINFL</label>
+        <input id="client_pinfl" value="{{loan.client.passport_pinfl}}" placeholder="PINFL">
+    </div>
+    <div class="field" style="align-self:end;">
+        <button class="primary" onclick="add_client()">Izlash</button>
+    </div>
+
+    <!-- Other fields -->
+    <div class="field"><label>Familiya</label><input value="{{loan.client.last_name}}"></div>
+    <div class="field"><label>Ism</label><input value="{{loan.client.first_name}}"></div>
+    <div class="field"><label>Otasining ismi</label><input value="{{loan.client.middle_name}}"></div>
+    <div class="field"><label>Tug‘ilgan sana</label><input type="date" value="{{loan.client.birth_date|date:'Y-m-d'}}"></div>
+    <div class="field">
+        <label>Jinsi</label>
+        <select>
+            <option value="male" {% if loan.client.gender == "male" %} selected {% endif %}>Erkak</option>
+            <option value="female" {% if loan.client.gender == "female" %} selected {% endif %}>Ayol</option>
+        </select>
+    </div>
+
+</div>
+
+<h2>Passport ma‘lumotlari</h2>
+<div class="card grid-3">
+    <div class="field"><label>Passport seriyasi</label><input value="{{loan.client.passport_serial}}"></div>
+    <div class="field"><label>Olingan sanasi</label><input type="date" value="{{loan.client.passport_got_date|date:'Y-m-d'}}"></div>
+    <div class="field"><label>Tugash sanasi</label><input type="date" value="{{loan.client.passport_expiry_date|date:'Y-m-d'}}"></div>
+    <div class="field"><label>Olingan region</label><input value="{{loan.client.passport_got_region}}"></div>
+</div>
+
+<h2>Manzil</h2>
+<div class="card grid-3">
+    <div class="field"><label>Joriy yashash joyi</label><input value="{{loan.client.current_address}}"></div>
+    <div class="field"><label>Davlat bazasidan yashash joyi</label><input value="{{loan.client.gov_address}}"></div>
+</div>
+<div class="card grid-3">
+    <div class="field"><label>Mo‘ljal</label><input value="{{loan.client.location}}"></div>
+</div>
+
+<h2>Mijoz kredit holati</h2>
+<div class="card grid-3">
+    <div class="field"><label>Kreditlar soni</label><input type="number"></div>
+    <div class="field"><label>Jami oylik to‘lovi</label><input type="number"></div>
+    <div class="field"><label>KATM scoring bali</label><input type="number" id="scoring" value="{{loan.scoring}}"></div>
+</div>
+
+<h2>Daromadlari</h2>
+<div class="card grid-3">
+    <div class="field"><label>Daromad tavsifi</label><input id="work_type" value="{{loan.work_type}}"></div>
+    <div class="field"><label>Oylik daromadi</label><input type="number" id="monthly_income" value="{{loan.monthly_income}}"></div>
+    <div class="field"><label>Oylik chiqimi</label><input type="number" id="monthly_spending" value="{{loan.monthly_spending}}"></div>
+</div>
+
+<h2>Izoh</h2>
+<div class="card grid-3">
+    <div class="field"><label>Mijoz haqida izoh</label><input></div>
+</div>
+</section>
+
+
+<!-- ===== TAB 3 ===== -->
+<section class="tab">
+<h2>Telefon va kartalar</h2>
+<div class="card">
+
+    <!-- ===== ADD CARD ===== -->
+    <h3>Karta qo‘shish</h3>
+    <div class="add-form grid-3">
+        <div class="field">
+            <label>Karta raqami</label>
+            <input id="new_card" placeholder="8600 **** **** ****">
+        </div>
+        <div class="field">
+            <label>Izoh</label>
+            <input id="new_card_comment" placeholder="Asosiy karta, Ijara...">
+        </div>
+        <div class="field" style="align-self:end;">
+            <button class="primary" onclick="addCard()">Qo‘shish</button>
+        </div>
+    </div>
+
+    <!-- LIST OF CARDS -->
+    <div id="card_list" style="margin-top:10px; display:flex;flex-direction:column; gap:10px;">
+        <div class="doc">
+            <span>💳 Uzcard **** 8844</span>
+            <span>Asosiy karta</span>
+            <button class="danger" onclick="deleteItem(this)">O‘chirish</button>
+        </div>
+    </div>
+
+    <hr style="margin:20px 0; border:1px dashed #ccc;">
+
+    <!-- ===== ADD PHONE ===== -->
+    <h3>Telefon qo‘shish</h3>
+    <div class="add-form grid-3">
+        <div class="field">
+            <label>Tel. raqam</label>
+            <input id="new_number" placeholder="+998 90 123 45 67">
+        </div>
+        <div class="field">
+            <label>Izoh</label>
+            <input id="new_number_comment" placeholder="O‘zi, Oila...">
+        </div>
+        <div class="field" style="align-self:end;">
+            <button class="primary" onclick="addNumber()">Qo‘shish</button>
+        </div>
+    </div>
+
+    <!-- LIST OF PHONE NUMBERS -->
+    <div id="number_list" style="margin-top:10px; display:flex;flex-direction:column; gap:10px;">
+        <div class="doc">
+            <span>📞 +998 90 123 45 67</span>
+            <span>O‘zi</span>
+            <button class="danger" onclick="deleteItem(this)">O‘chirish</button>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!-- ===== TAB 4 ===== -->
+<section class="tab">
+<h2>Tasdiqlash</h2>
+<div class="card summary">
+    <p><b>Mijoz:</b> {{ loan.client.full_name }}</p>
+    <p><b>Mahsulot:</b> {{ loan.product.name }}</p>
+    <p><b>Jami summa:</b> {{ loan.amount|intcomma }} so‘m</p>
+    <p><b>Oylik to‘lov:</b> <span id="confirm_monthly"></span></p>
+</div>
+</section>
+
+<!-- ===== TAB 5 ===== -->
+<section class="tab">
+<h2>Hujjatlar</h2>
+<div class="card">
+    <div class="doc">Shartnoma <button class="primary">PDF</button></div>
+    <div class="doc">Rozilik xati <button class="primary">PDF</button></div>
+    <div class="doc">Axborot varaqasi <button class="primary">PDF</button></div>
+</div>
+</section>
+
+<!-- ===== TAB 6 ===== -->
+<section class="tab">
+<h2>Yakunlash</h2>
+<div class="card end">
+    <p>Shartnomani yakunlash uchun tasdiqlang</p>
+    <button class="primary large" onclick="spawnAlert('Kredit muvaffaqiyatli yakunlandi','success')">
+        Yakunlash
+    </button>
+</div>
+</section>
+
+</main>
+<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+<!-- ================= FOOTER ================= -->
+<footer class="footer-nav">
+    <button class="ghost" onclick="prevTab()">Orqaga</button>
+    <button class="danger" onclick="spawnAlert('Jarayon bekor qilindi','error')">Bekor qilish</button>
+    <button class="primary" onclick="nextTab()">Keyingi</button>
+</footer>
+
+<!-- ================= JS ================= -->
+<script>
+
+function send_data(){
+    let inputs = document.querySelectorAll("input, select")
+    let data = {}
+    inputs.forEach((i,index)=>{
+        data[i.id] = i.value;
+    })
+    $.ajax({
+        url: "{% url 'save_data' %}",
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.getElementById("csrf_token").value
+        },
+        data: {
+            data: JSON.stringify(data),
+            id: "{{loan.id}}"
+        },
+        success: function( result ) {
+            
+        }
+    });
+    console.log(data)
+}
+
+function add_client(){
+    let pinfl = document.getElementById("client_pinfl").value
+    console.log("searching for client")
+    $.ajax({
+        url: "{% url 'add_client' %}",
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.getElementById("csrf_token").value
+        },
+        data: {
+            pinfl: pinfl,
+            id: "{{loan.id}}"
+        },
+        success: function( result ) {
+            if (result.status === true){
+                spawnAlert('Mijoz topildi','success')
+            } else {
+                spawnAlert('Mijoz topilmadi','error')
+            }
+        }
+    });
+}
+
+
+
+// ===== TAB LOGIC WITH URL & LOCALSTORAGE =====
+let tabs = document.querySelectorAll(".tab");
+let steps = document.querySelectorAll(".step");
+let current = 0;
+
+// Read ?tab= or localStorage
+const url = new URL(window.location);
+const page = url.searchParams.get("tab");
+if(page && !isNaN(page) && page>=0 && page<tabs.length){
+    current = Number(page);
+}
+
+function showTab(i){
+    tabs.forEach(t=>t.classList.remove("active"));
+    steps.forEach(s=>s.classList.remove("active"));
+    tabs[i].classList.add("active");
+    steps[i].classList.add("active");
+    current = i;
+
+    // Update URL and localStorage
+    url.searchParams.set("tab",i);
+    window.history.replaceState({}, "", url);
+    send_data()
+}
+function nextTab(){ if(current < tabs.length-1) showTab(current+1); }
+function prevTab(){ if(current > 0) showTab(current-1); }
+steps.forEach((s,i)=>s.onclick=()=>showTab(i));
+
+// Initialize
+showTab(current);
+
+// ===== ALERT SYSTEM =====
+function spawnAlert(text,type='info'){
+    const a=document.createElement("div");
+    a.className="alert "+type;
+    a.innerText=text;
+    document.getElementById("alerts").appendChild(a);
+    setTimeout(()=>a.classList.add("hide"),2500);
+    setTimeout(()=>a.remove(),3000);
+}
+
+// ===== MONTHLY PAYMENT CALCULATION =====
+function calculateMonthlyPayment(){
+    const principal = parseFloat(document.getElementById("price").value);
+    const rateYear  = parseFloat(document.getElementById("loan_rate").value);
+    const start     = new Date(document.getElementById("loan_start_date").value);
+    const end       = new Date(document.getElementById("loan_end_date").value);
+
+    if(!principal || !rateYear || !end) return;
+
+    let months = (end.getFullYear()-start.getFullYear())*12 + (end.getMonth()-start.getMonth());
+    if(months <= 0) return;
+
+    // Simple interest calculation
+    const total = principal + (principal * rateYear / 100);
+    const monthly = total / months;
+
+    document.getElementById("monthly_payment").value = Math.round(monthly).toLocaleString("ru-RU")+" so‘m";
+    document.getElementById("amount").value = Math.round(total);
+    document.getElementById("confirm_monthly").innerText = Math.round(monthly).toLocaleString("ru-RU")+" so‘m";
+}
+
+
+document.getElementById("loan_end_date").addEventListener("change", calculateMonthlyPayment);
+document.getElementById("rate").addEventListener("input", calculateMonthlyPayment);
+window.onload = calculateMonthlyPayment;
+
+
+
+
+
+</script>
+
+<!-- ================= CSS ================= -->
+<style>
+:root{--p:#0f6b3d;--bg:#f4f6f8;--bd:#dcdfe4}
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:var(--bg)}
+.topbar{background:linear-gradient(135deg,#0f6b3d,#094a29);color:#fff;padding:16px 24px;display:flex;justify-content:space-between}
+.subtitle{font-size:13px;opacity:.85}
+.steps{display:flex;gap:8px;background:#fff;padding:10px;border-bottom:1px solid var(--bd)}
+.step{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bd);cursor:pointer;text-align:center;font-size:14px}
+.step.active{background:var(--p);color:#fff}
+.container{padding:24px}
+.tab{display:none}
+.tab.active{display:block}
+.card{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+input,select{padding:10px;border-radius:10px;border:1px solid var(--bd)}
+.footer-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bd);padding:12px 24px;display:flex;justify-content:space-between}
+.primary{background:var(--p);color:#fff;border:none;padding:10px 18px;border-radius:12px;cursor:pointer}
+.danger{background:#b91c1c;color:#fff;border:none;padding:10px 18px;border-radius:12px;cursor:pointer}
+.ghost{background:#eef2f3;border:1px solid var(--bd);padding:10px 18px;border-radius:12px;cursor:pointer}
+.large{font-size:18px;padding:14px 26px}
+.doc{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.end{text-align:center}
+#alerts{position:fixed;top:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:999}
+.alert{padding:12px 16px;border-radius:12px;color:#fff;min-width:220px;animation:slide .3s}
+.alert.success{background:#16a34a}
+.alert.info{background:#2563eb}
+.alert.error{background:#dc2626}
+.alert.hide{opacity:0;transform:translateX(50px);transition:.3s}
+@keyframes slide{from{opacity:0;transform:translateX(50px)}to{opacity:1}}
+</style>
+
+</body>
+</html>
