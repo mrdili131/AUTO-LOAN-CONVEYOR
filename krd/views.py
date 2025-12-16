@@ -4,12 +4,14 @@ from django.views import View
 from django.http.response import JsonResponse
 import json
 from datetime import datetime
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
-class IndexView(View):
+class IndexView(LoginRequiredMixin,View):
     def get(self,request):
         return render(request,'index.html')
     
-class KonveyerView(View):
+class KonveyerView(LoginRequiredMixin,View):
     def get(self,request,id):
         loan = Loan.objects.get(id=id)
         products = Product.objects.filter(filial=request.user.filial,is_available=True)
@@ -17,6 +19,8 @@ class KonveyerView(View):
             loan.amount = (loan.product_price/100*loan.rate)+loan.product_price
             loan.save()
         return render(request,'konveyer.html',{"loan":loan,"products":products})
+    
+@login_required
 def create_request(request):
     newloan = Loan(
         user = request.user,
@@ -25,6 +29,15 @@ def create_request(request):
     newloan.save()
     return redirect('konveyer',id=newloan.id)
 
+def timify(data):
+    from datetime import date
+    if str(data)!= '' and len(str(data)) == 10:
+        time = date(int(str(data).split('-')[0]),int(str(data).split('-')[1]),int(str(data).split('-')[2]))
+        return time
+    else:
+        return date(2025,1,1)
+
+@login_required
 def save_data(request):
     if request.method == "POST":
         data = json.loads(request.POST.get("data"))
@@ -41,9 +54,36 @@ def save_data(request):
             loan.scoring = int(data["scoring"])
             loan.work_type = data["work_type"]
             loan.end_date = datetime.strptime(data["loan_end_date"], "%Y-%m-%d").date()
+
+            client, newclient = Client.objects.update_or_create(
+                passport_pinfl = data["client_pinfl"],
+                defaults={
+                "first_name": data["first_name"],
+                "last_name": data["last_name"],
+                "middle_name": data["middle_name"],
+                "gender": data["gender"],
+                "passport_serial": data["passport_serial"],
+                "passport_got_date": timify(data["passport_got_date"]),
+                "passport_expiry_date": timify(data["passport_expiry_date"]),
+                "passport_got_region": data["passport_got_region"],
+                "current_address": data["current_address"],
+                "birth_date": data["birth_date"],
+                "gov_address": data["gov_address"],
+                "location": data["location"],
+                "description": data["description"],
+                "filial": request.user.filial
+                }
+            )
+            if loan.client is None:
+                newclient = Client.objects.get(passport_pinfl=data["client_pinfl"])
+                loan.client = newclient
+                loan.save()
+                return JsonResponse({"status":True})
+            loan.client = client
             loan.save()
             return JsonResponse({"status":True})
     
+@login_required
 def add_client(request):
     if request.method == "POST":
         passport_pinfl = request.POST.get("pinfl")

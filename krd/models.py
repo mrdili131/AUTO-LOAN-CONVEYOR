@@ -68,8 +68,12 @@ class Loan(models.Model):
     # Client data
     monthly_income = models.DecimalField(max_digits=10,decimal_places=0,default=0)
     monthly_spending = models.DecimalField(max_digits=10,decimal_places=0,default=0)
-    scoring = models.IntegerField(default=0)
     work_type = models.CharField(max_length=50,null=True,blank=True)
+
+    # Loans
+    loans = models.IntegerField(default=0)
+    monthly_loan_payment = models.DecimalField(max_digits=10,decimal_places=0,default=0)
+    scoring = models.IntegerField(default=0)
 
     # Dates
     start_date = models.DateField(auto_now_add=True)

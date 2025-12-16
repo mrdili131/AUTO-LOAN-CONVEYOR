@@ -43,10 +43,10 @@
         <label>Mahsulot</label>
         <select id="product">
             {% for i in products%}
-            <option value="{{i.id}}">{{ i.name }}</option>
+            <option value="{{i.id}}" {% if i.id == loan.product.id %} selected {% endif %}>{{ i.name }}</option>
             {% endfor %}
         </select>
-        <button class="primary" onclick="spawnAlert('Maxsulot saqlandi!','info')">Saqlash</button>
+        <button class="primary" onclick="save_product()">Saqlash</button>
     </div>
     <div class="field">
         <label>Asl narxi</label>
@@ -93,13 +93,13 @@
     </div>
 
     <!-- Other fields -->
-    <div class="field"><label>Familiya</label><input value="{{loan.client.last_name}}"></div>
-    <div class="field"><label>Ism</label><input value="{{loan.client.first_name}}"></div>
-    <div class="field"><label>Otasining ismi</label><input value="{{loan.client.middle_name}}"></div>
-    <div class="field"><label>Tug‘ilgan sana</label><input type="date" value="{{loan.client.birth_date|date:'Y-m-d'}}"></div>
+    <div class="field"><label>Familiya</label><input id="last_name" value="{{loan.client.last_name}}"></div>
+    <div class="field"><label>Ism</label><input id="first_name" value="{{loan.client.first_name}}"></div>
+    <div class="field"><label>Otasining ismi</label><input id="middle_name" value="{{loan.client.middle_name}}"></div>
+    <div class="field"><label>Tug‘ilgan sana</label><input id="birth_date" type="date" value="{{loan.client.birth_date|date:'Y-m-d'}}"></div>
     <div class="field">
         <label>Jinsi</label>
-        <select>
+        <select id="gender">
             <option value="male" {% if loan.client.gender == "male" %} selected {% endif %}>Erkak</option>
             <option value="female" {% if loan.client.gender == "female" %} selected {% endif %}>Ayol</option>
         </select>
@@ -109,25 +109,25 @@
 
 <h2>Passport ma‘lumotlari</h2>
 <div class="card grid-3">
-    <div class="field"><label>Passport seriyasi</label><input value="{{loan.client.passport_serial}}"></div>
-    <div class="field"><label>Olingan sanasi</label><input type="date" value="{{loan.client.passport_got_date|date:'Y-m-d'}}"></div>
-    <div class="field"><label>Tugash sanasi</label><input type="date" value="{{loan.client.passport_expiry_date|date:'Y-m-d'}}"></div>
-    <div class="field"><label>Olingan region</label><input value="{{loan.client.passport_got_region}}"></div>
+    <div class="field"><label>Passport seriyasi</label><input id="passport_serial" value="{{loan.client.passport_serial}}"></div>
+    <div class="field"><label>Olingan sanasi</label><input id="passport_got_date" type="date" value="{{loan.client.passport_got_date|date:'Y-m-d'}}"></div>
+    <div class="field"><label>Tugash sanasi</label><input id="passport_expiry_date" type="date" value="{{loan.client.passport_expiry_date|date:'Y-m-d'}}"></div>
+    <div class="field"><label>Olingan region</label><input id="passport_got_region" value="{{loan.client.passport_got_region}}"></div>
 </div>
 
 <h2>Manzil</h2>
 <div class="card grid-3">
-    <div class="field"><label>Joriy yashash joyi</label><input value="{{loan.client.current_address}}"></div>
-    <div class="field"><label>Davlat bazasidan yashash joyi</label><input value="{{loan.client.gov_address}}"></div>
+    <div class="field"><label>Joriy yashash joyi</label><input id="current_address" value="{{loan.client.current_address}}"></div>
+    <div class="field"><label>Davlat bazasidan yashash joyi</label><input id="gov_address" value="{{loan.client.gov_address}}"></div>
 </div>
 <div class="card grid-3">
-    <div class="field"><label>Mo‘ljal</label><input value="{{loan.client.location}}"></div>
+    <div class="field"><label>Mo‘ljal</label><input id="location" value="{{loan.client.location}}"></div>
 </div>
 
 <h2>Mijoz kredit holati</h2>
 <div class="card grid-3">
-    <div class="field"><label>Kreditlar soni</label><input type="number"></div>
-    <div class="field"><label>Jami oylik to‘lovi</label><input type="number"></div>
+    <div class="field"><label>Kreditlar soni</label><input id="loans" value="{{loan.loans}}" type="number"></div>
+    <div class="field"><label>Jami oylik to‘lovi</label><input id="monthly_loan_payment" value="{{loan.monthly_loan_payment}}" type="number"></div>
     <div class="field"><label>KATM scoring bali</label><input type="number" id="scoring" value="{{loan.scoring}}"></div>
 </div>
 
@@ -140,7 +140,7 @@
 
 <h2>Izoh</h2>
 <div class="card grid-3">
-    <div class="field"><label>Mijoz haqida izoh</label><input></div>
+    <div class="field"><label>Mijoz haqida izoh</label><input id="description" value="{{loan.client.description}}"></div>
 </div>
 </section>
 
@@ -270,6 +270,11 @@ function send_data(){
         }
     });
     console.log(data)
+}
+
+function save_product(){
+    send_data()
+    window.location.reload()
 }
 
 function add_client(){
