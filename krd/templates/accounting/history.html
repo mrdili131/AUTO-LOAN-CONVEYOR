@@ -1,0 +1,182 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buxgalteriya – Tasdiqlangan Arizalar</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{--p:#0f6b3d;--bg:#f4f6f8;--bd:#dcdfe4}
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:var(--bg)}
+
+.topbar{
+    background:linear-gradient(135deg,#0f6b3d,#094a29);
+    color:#fff;
+    padding:16px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.nav-actions{display:flex;gap:10px}
+
+.ghost{
+    background:#eef2f3;
+    border:1px solid var(--bd);
+    padding:8px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.container{padding:24px;max-width:1200px;margin:auto}
+
+.loan{
+    background:#fff;
+    border:1px solid var(--bd);
+    border-radius:16px;
+    margin-bottom:14px;
+    overflow:hidden;
+}
+
+.loan-header{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1fr auto;
+    gap:10px;
+    padding:16px;
+    cursor:pointer;
+    align-items:center;
+}
+.loan-header:hover{background:#f9fafb}
+
+.loan-body{
+    display:none;
+    padding:20px;
+    border-top:1px dashed var(--bd);
+}
+.loan.open .loan-body{display:block}
+
+.label{font-size:12px;color:#555}
+.value{font-weight:600}
+
+.badge{
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+.approved{background:#dcfce7;color:#166534}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+}
+
+button{
+    padding:10px 18px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+}
+
+.primary{background:var(--p);color:#fff}
+
+textarea{
+    width:100%;
+    padding:10px;
+    border-radius:12px;
+    border:1px solid var(--bd);
+}
+
+.actions{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+    flex-wrap:wrap;
+}
+
+/* ===== PRINT ONLY ONE LOAN ===== */
+@media print{
+    body *{
+        visibility:hidden;
+    }
+    .loan.printing,
+    .loan.printing *{
+        visibility:visible;
+    }
+    .loan.printing{
+        position:absolute;
+        inset:0;
+        margin:0;
+        border:none;
+    }
+    button, textarea{
+        display:none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header class="topbar">
+    <h1>Buxgalteriya – Tasdiqlangan Arizalar</h1>
+    <div class="nav-actions">
+        <a href="{% url 'accounting:home' %}" style="text-decoration: none;color: black;" class="ghost">🔙 Orqaga</a>
+    </div>
+</header>
+
+<main class="container">
+
+<!-- ===== LOAN 1 ===== -->
+ {% for i in loans %}
+<div class="loan">
+    <div class="loan-header" onclick="toggle(this)">
+        <div><div class="label">Kredit</div><div class="value">#{{i.loan.id}}</div></div>
+        <div><div class="label">Mijoz</div><div class="value">{{i.loan.client.full_name}}</div></div>
+        <div><div class="label">Jami</div><div class="value">{{i.loan.total_amount|intcomma}} so'm</div></div>
+        <div><div class="label">Oylik</div><div class="value">{{i.loan.payment|intcomma}} so'm</div></div>
+        <div><div class="label">Tasqidchi</div><div class="value">{{user.full_name}}</div></div>
+        <span class="badge approved">Tasdiqlandi</span>
+    </div>
+
+    <div class="loan-body">
+        <div class="grid-3">
+            <div><div class="label">Mahsulot</div><div class="value">{{i.loan.product.name}}</div></div>
+            <div><div class="label">Foiz</div><div class="value">{{i.loan.rate}}%</div></div>
+            <div><div class="label">Scoring</div><div class="value">{{i.loan.scoring}}</div></div>
+            <div><div class="label">Daromad</div><div class="value">{{i.loan.monthly_income|intcomma}} so'm</div></div>
+            <div><div class="label">Chiqim</div><div class="value">{{i.loan.monthly_spending|intcomma}} so'm</div></div>
+            <div><div class="label">Muddat</div><div class="value">{{i.loan.term}} oy</div></div>
+        </div>
+
+        <div class="actions">
+            <button class="primary" onclick="printLoan(this)">🖨 Chop etish</button>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+</main>
+
+<script>
+function toggle(el){
+    el.closest(".loan").classList.toggle("open");
+}
+
+function printLoan(btn){
+    const loan = btn.closest(".loan");
+    loan.classList.add("printing");
+    window.print();
+    setTimeout(()=>loan.classList.remove("printing"),500);
+}
+</script>
+
+</body>
+</html>

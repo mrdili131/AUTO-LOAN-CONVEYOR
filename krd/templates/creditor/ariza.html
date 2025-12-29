@@ -62,6 +62,7 @@ tr:hover{background:#eef2f3}
                     <th>PINFL</th>
                     <th>Mahsulot</th>
                     <th>Jami summa</th>
+                    <th>Filial</th>
                     <th>Status</th>
                     <th>Amallar</th>
                 </tr>
@@ -74,7 +75,8 @@ tr:hover{background:#eef2f3}
                     <td>{{i.client.full_name}}</td>
                     <td>{{i.client.passport_pinfl}}</td>
                     <td>{{i.product.name}}</td>
-                    <td>{{i.amount|intcomma}} so‘m</td>
+                    <td>{{i.total_amount|intcomma}} so‘m</td>
+                    <td>{{i.filial.name}}</td>
                     {% if i.status == "pending" %}
                         <td style="color: rgb(189, 189, 10);">Jarayonda</td>
                     {% elif i.status == "rejected" %}
@@ -82,7 +84,9 @@ tr:hover{background:#eef2f3}
                     {% elif i.status == "paid" %}
                         <td style="color: rgb(0, 0, 0);">Yopilgan</td>
                     {% elif i.status == "done" %}
-                        <td style="color: rgb(42, 192, 92);">Berilgan</td>
+                        <td style="color: rgb(32, 206, 90);">Berilgan</td>
+                    {% elif i.status == "approved" %}
+                        <td style="color: rgb(145, 127, 28);">Berilgan</td>
                     {% endif %}
                     <td><a href="{% url 'konveyer' i.id %}" style="text-decoration: none;" class="view-btn" onclick="viewRequest(1)">View</a></td>
                 </tr>
@@ -122,11 +126,6 @@ function searchTable(){
 }
 
 // ===== VIEW REQUEST =====
-function viewRequest(id){
-    // Here you can navigate to detail page
-    // e.g., /application/1
-    window.location.href = `/application/${id}`;
-}
 </script>
 
 </body>

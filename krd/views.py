@@ -6,11 +6,15 @@ import json
 from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from .utils import role_required
+from django.utils.decorators import method_decorator
 
+@method_decorator(role_required('creditor'),name="dispatch")
 class IndexView(LoginRequiredMixin,View):
     def get(self,request):
-        return render(request,'index.html')
-    
+        return render(request,'creditor/index.html')
+
+@method_decorator(role_required('creditor'),name="dispatch")
 class KonveyerView(LoginRequiredMixin,View):
     def get(self,request,id):
         loan = Loan.objects.get(id=id)
@@ -18,13 +22,14 @@ class KonveyerView(LoginRequiredMixin,View):
         if loan.product_price and loan.rate and loan.product.price:
             loan.amount = (loan.product_price/100*loan.rate)+loan.product_price
             loan.save()
-        return render(request,'konveyer.html',{"loan":loan,"products":products})
+        return render(request,'creditor/konveyer.html',{"loan":loan,"products":products})
     
-
+@method_decorator(role_required('creditor'),name="dispatch")
 class RequestsView(LoginRequiredMixin,View):
     def get(self,request):
         loans = Loan.objects.filter(filial=request.user.filial).order_by("-created_at")
-        return render(request,'ariza.html',{"loans":loans})
+        return render(request,'creditor/ariza.html',{"loans":loans})
+
 
 
 # Shortcuts
@@ -53,7 +58,7 @@ def save_data(request):
         if data and id:
             loan = Loan.objects.get(id=id)
             product = Product.objects.get(id=int(data["product"]))
-            loan.amount = float(data["amount"])
+            loan.total_amount = float(data["total_amount"] or 0)
             loan.product = product
             loan.product_price = product.price
             loan.rate = int(data["loan_rate"])
@@ -61,6 +66,8 @@ def save_data(request):
             loan.monthly_spending = int(data["monthly_spending"])
             loan.scoring = int(data["scoring"])
             loan.work_type = data["work_type"]
+            loan.loans = int(data["loans"])
+            loan.monthly_loan_payment = int(data["monthly_loan_payment"])
             loan.end_date = datetime.strptime(data["loan_end_date"], "%Y-%m-%d").date()
 
             client, newclient = Client.objects.update_or_create(
@@ -130,6 +137,11 @@ def save_number(request):
         return JsonResponse({"status":False})
     
 @login_required
+def delete_number(request,id):
+    PhoneNumber.objects.get(id=id).delete()
+    return JsonResponse({"status":True})
+    
+@login_required
 def approve(request):
     if request.method == 'POST':
         loan_id = request.POST.get('loan_id')
@@ -142,10 +154,15 @@ def approve(request):
                 return JsonResponse({"status":False,"msg":"Ushbu hujjat avvalroq tasdiqlangan!"})
             elif(loan.status == "paid"):
                 return JsonResponse({"status":False,"msg":"Ushbu shartnoma yakunlangan!"})
+            elif(loan.status == "approved"):
+                return JsonResponse({"status":False,"msg":"Ushbu shartnoma yakunlangan!"})
             else:
-                loan.status = "done"
+                loan.status = "approved"
                 loan.save()
-                return JsonResponse({"status":True,"msg":"Amaliyot bajarildi"})
+                return JsonResponse({"status":True,"msg":"Mijozni buxgalteriyaga jo'nating!"})
+            
+            
+
             
 @login_required
 def reject(request):

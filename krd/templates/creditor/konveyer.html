@@ -58,7 +58,7 @@
     </div>
     <div class="field">
         <label>Foiz bilan jami summa</label>
-        <input id="amount" readonly value="{{ loan.amount }}">
+        <input id="total_amount" readonly value="{{ loan.amount }}">
     </div>
     <div class="field">
         <label>Boshlanish sanasi</label>
@@ -70,7 +70,7 @@
     </div>
     <div class="field">
         <label>Oylik to‘lov</label>
-        <input id="monthly_payment" readonly>
+        <input id="monthly_payment" value="{{loan.payment}}" readonly>
     </div>
     <div class="field">
         <button class="primary" id="make_graphic" onclick="calculateMonthlyPayment()">Grafikni tuzish</button>
@@ -171,7 +171,7 @@
         <div class="doc">
             <span>💳 Uzcard **** 8844</span>
             <span>Asosiy karta</span>
-            <button class="danger" onclick="deleteItem(this)">O‘chirish</button>
+            <button class="danger">O‘chirish</button>
         </div>
     </div>
 
@@ -196,10 +196,10 @@
     <!-- LIST OF PHONE NUMBERS -->
     <div id="number_list" class="number_list" style="margin-top:10px; display:flex;flex-direction:column; gap:10px;">
         {% for i in loan.client.numbers.all %}
-        <div class="doc">
+        <div class="doc number_{{i.id}}">
             <span>📞 {{i.number}}</span>
             <span>{{i.name}}</span>
-            <button class="danger" onclick="deleteItem(this)">O‘chirish</button>
+            <button class="danger" id="{{i.id}}" onclick="delete_number(this)">O‘chirish</button>
         </div>
         {% endfor %}
     </div>
@@ -214,7 +214,9 @@
     <p><b>Mijoz:</b> {{ loan.client.full_name }}</p>
     <p><b>Mahsulot:</b> {{ loan.product.name }}</p>
     <p><b>Jami summa:</b> {{ loan.amount|intcomma }} so‘m</p>
-    <p><b>Oylik to‘lov:</b> <span id="confirm_monthly"></span></p>
+    <p><b>Oylik to‘lov:</b> {{loan.payment|intcomma}} so'm <span id="confirm_monthly"></span></p>
+    <p><b>Muddati:</b> {{ loan.term }}</p>
+    
 </div>
 </section>
 
@@ -232,7 +234,7 @@
 <section class="tab">
 <h2>Yakunlash</h2>
 <div class="card end">
-    <p>Shartnomani yakunlash uchun tasdiqlang</p>
+    <p>Davom etish uchun buxgalterigaga o'ting</p>
     <button class="primary large" onclick="approve()">
         Yakunlash
     </button>
@@ -244,7 +246,7 @@
 <!-- ================= FOOTER ================= -->
 <footer class="footer-nav">
     <button class="ghost" onclick="prevTab()">Orqaga</button>
-    <a href="/requests" class="ghost" style="text-decoration: none;color:black;font-size: 13px;" onclick="reject()">Arizalar tarixi</a>
+    <a href="{% url 'requests' %}" class="ghost" style="text-decoration: none;color:black;font-size: 13px;">Arizalar tarixi</a>
     <button class="danger" onclick="reject()">Bekor qilish</button>
     <button class="primary" onclick="nextTab()">Keyingi</button>
 </footer>
@@ -252,10 +254,13 @@
 <!-- ================= JS ================= -->
 <script>
 
-    if ("{{loan.status}}" === "rejected" || "{{loan.status}}" === "done"){
+    if ("{{loan.status}}" === "rejected" || "{{loan.status}}" === "done" || "{{loan.status}}" === "approved"){
         document.querySelectorAll('.tab').forEach(f=>{
             f.querySelectorAll('input,select,button').forEach(i=>{
-                if(i.id !== "make_graphic" && i.id !== "to_pdf")
+                if(
+                    i.id !== "make_graphic" &&
+                    i.id !== "to_pdf"
+                )
             i.disabled = true;
             i.readOnly = true;
             })
@@ -286,8 +291,10 @@ function send_data(){
 }
 
 function save_product(){
-    send_data()
-    window.location.reload()
+    send_data();
+    setTimeout(()=>{
+        window.location.reload()
+    },100)
 }
 
 
@@ -307,6 +314,9 @@ function add_client(){
         success: function( result ) {
             if (result.status === true){
                 spawnAlert('Mijoz topildi','success')
+                setTimeout(()=>{
+                    window.location.reload()
+                },1000)
             } else {
                 spawnAlert('Mijoz topilmadi','error')
             }
@@ -354,6 +364,15 @@ function save_number(){
         });
     }
     
+}
+
+function delete_number(el){
+    fetch(`/delete_number/${el.id}/`, { method: 'POST', 
+        headers: {
+            "X-CSRFToken": document.getElementById("csrf_token").value
+        }
+    })
+    document.querySelector(`.number_${el.id}`).remove()
 }
 
 function reject(){

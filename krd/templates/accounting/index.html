@@ -1,0 +1,227 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buxgalteriya – Kreditlarni tasdiqlash</title>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{--p:#0f6b3d;--bg:#f4f6f8;--bd:#dcdfe4}
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:var(--bg)}
+
+.topbar{
+    background:linear-gradient(135deg,#0f6b3d,#094a29);
+    color:#fff;
+    padding:16px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.nav-actions{display:flex;gap:10px}
+
+.ghost{
+    background:#eef2f3;
+    border:1px solid var(--bd);
+    padding:8px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:13px;
+}
+
+.container{padding:24px;max-width:1200px;margin:auto}
+
+.loan{
+    background:#fff;
+    border:1px solid var(--bd);
+    border-radius:16px;
+    margin-bottom:14px;
+    overflow:hidden;
+}
+
+.loan-header{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1fr auto;
+    gap:10px;
+    padding:16px;
+    cursor:pointer;
+    align-items:center;
+}
+.loan-header:hover{background:#f9fafb}
+
+.loan-body{
+    display:none;
+    padding:20px;
+    border-top:1px dashed var(--bd);
+}
+.loan.open .loan-body{display:block}
+
+.label{font-size:12px;color:#555}
+.value{font-weight:600}
+
+.badge{
+    padding:6px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+.wait{background:#fef3c7;color:#92400e}
+.approved{background:#dcfce7;color:#166534}
+.rejected{background:#fee2e2;color:#991b1b}
+
+.grid-3{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+}
+
+button{
+    padding:10px 18px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
+}
+
+.primary{background:var(--p);color:#fff}
+.danger{background:#b91c1c;color:#fff}
+
+textarea{
+    width:100%;
+    padding:10px;
+    border-radius:12px;
+    border:1px solid var(--bd);
+}
+
+.actions{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+    flex-wrap:wrap;
+}
+
+/* ===== PRINT ONLY ONE LOAN ===== */
+@media print{
+    body *{
+        visibility:hidden;
+    }
+    .loan.printing,
+    .loan.printing *{
+        visibility:visible;
+    }
+    .loan.printing{
+        position:absolute;
+        inset:0;
+        margin:0;
+        border:none;
+    }
+    button, textarea{
+        display:none !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header class="topbar">
+    <h1>Buxgalteriya – Kreditlarni tasdiqlash</h1>
+    <div class="nav-actions">
+        <a href="{% url 'accounting:history' %}" style="text-decoration: none; color: black;" class="ghost">📜 History</a>
+    </div>
+</header>
+
+<main class="container">
+
+<!-- ===== LOAN 1 ===== -->
+ {% for i in loans %}
+<div class="loan">
+    <div class="loan-header" onclick="toggle(this)">
+        <div><div class="label">Kredit</div><div class="value">#{{i.id}}</div></div>
+        <div><div class="label">Mijoz</div><div class="value">{{i.client.full_name}}</div></div>
+        <div><div class="label">Jami</div><div class="value">{{i.total_amount|intcomma}} so'm</div></div>
+        <div><div class="label">Oylik</div><div class="value">{{i.payment|intcomma}} so'm</div></div>
+        <span class="badge wait">Kutilmoqda</span>
+    </div>
+
+    <div class="loan-body">
+        <div class="grid-3">
+            <div><div class="label">Mahsulot</div><div class="value">{{i.product.name}}</div></div>
+            <div><div class="label">Foiz</div><div class="value">{{i.rate}}%</div></div>
+            <div><div class="label">Scoring</div><div class="value">{{i.scoring}}</div></div>
+            <div><div class="label">Daromad</div><div class="value">{{i.monthly_income|intcomma}} so'm</div></div>
+            <div><div class="label">Chiqim</div><div class="value">{{i.monthly_spending|intcomma}} so'm</div></div>
+            <div><div class="label">Muddat</div><div class="value">{{i.term}} oy</div></div>
+        </div>
+
+        <div class="label" style="margin-top:16px">Izoh</div>
+        <textarea placeholder="Rad etish sababi (majburiy)"></textarea>
+
+        <div class="actions">
+            <button class="danger" onclick="reject({{i.id}})">Rad etish</button>
+            <button class="primary" onclick="approve({{i.id}})">Tasdiqlash</button>
+            <button class="ghost" onclick="printLoan(this)">🖨 Chop etish</button>
+        </div>
+    </div>
+</div>
+{% endfor %}
+<input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
+</main>
+
+<script>
+function toggle(el){
+    el.closest(".loan").classList.toggle("open");
+}
+
+
+function printLoan(btn){
+    const loan = btn.closest(".loan");
+    loan.classList.add("printing");
+    window.print();
+    setTimeout(()=>loan.classList.remove("printing"),500);
+}
+
+
+
+function reject(id){
+    $.ajax({
+        url: "{% url 'reject' %}",
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.getElementById("csrf_token").value
+        },
+        data: {
+            id: id
+        },
+        success: function( result ) {
+            window.location.reload()
+        }
+    });
+}
+
+function approve(id){
+        $.ajax({
+            url: "{% url 'accounting:done' %}",
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.getElementById("csrf_token").value
+            },
+            data: {
+                loan_id: id
+            },
+            success: function( result ) {
+                window.location.reload()
+            }
+        });
+    }
+
+</script>
+
+</body>
+</html>

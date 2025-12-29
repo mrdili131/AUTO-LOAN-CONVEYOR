@@ -9,6 +9,7 @@ gender = [
 
 status = [
     ('done','berildi'),
+    ('approved', 'tasdiqlandi'),
     ('rejected',"rad etildi"),
     ('pending','jarayonda'),
     ('paid','yopilgan')
@@ -21,7 +22,7 @@ class Client(models.Model):
     middle_name = models.CharField(max_length=100,null=True,blank=True)
     full_name = models.CharField(max_length=250,null=True,blank=True)
     birth_date = models.DateField(null=True,blank=True)
-    gender = models.CharField(choices=gender,default='male')
+    gender = models.CharField(max_length=30,choices=gender,default='male')
 
     # Passport data
     passport_serial = models.CharField(max_length=9,null=True,blank=True)
@@ -68,7 +69,9 @@ class Loan(models.Model):
     contract_id = models.CharField(max_length=50,null=True,blank=True)
 
     # Credit essentials
-    amount = models.DecimalField(max_digits=10,decimal_places=0,default=0)
+    payment = models.DecimalField(max_digits=10,decimal_places=0,default=0)
+    total_amount = models.DecimalField(max_digits=10,decimal_places=0,default=0)
+    term = models.IntegerField(default=0,null=True,blank=True)
     product = models.ForeignKey(Product,on_delete=models.CASCADE,null=True,blank=True)
     product_price = models.DecimalField(max_digits=10,decimal_places=0,default=0)
     rate = models.IntegerField(default=0,null=True,blank=True)
@@ -93,8 +96,29 @@ class Loan(models.Model):
     filial = models.ForeignKey(Filial,on_delete=models.SET_NULL,null=True,blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def _str__(self):
-        return f"{self.id} | {self.amount} | {self.created_at.ctime()}"
+    def save(self,*args,**kwargs):
+        if (
+            self.product and
+            self.product.price and
+            self.product_price and
+            self.start_date and
+            self.rate and
+            self.end_date
+        ):
+            months = (self.end_date.year - self.start_date.year) * 12 + (self.end_date.month - self.start_date.month)
+            if months <= 0:
+                months = 1
+            amount = self.product_price + (self.product_price * self.rate /100)
+            self.total_amount = amount
+            self.payment = round(amount / months)
+            self.term = months
+            super().save(*args,**kwargs)
+        else:
+            super().save(*args,**kwargs)
+
+    
+    def __str__(self):
+        return f"ID: {self.id} | At: {self.created_at.ctime()}"
 
 
         
