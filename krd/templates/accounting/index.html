@@ -142,7 +142,7 @@ textarea{
  {% for i in loans %}
 <div class="loan">
     <div class="loan-header" onclick="toggle(this)">
-        <div><div class="label">Kredit</div><div class="value">#{{i.id}}</div></div>
+        <div><div class="label">Kredit</div><div class="value">№{{i.contract_id}}</div></div>
         <div><div class="label">Mijoz</div><div class="value">{{i.client.full_name}}</div></div>
         <div><div class="label">Jami</div><div class="value">{{i.total_amount|intcomma}} so'm</div></div>
         <div><div class="label">Oylik</div><div class="value">{{i.payment|intcomma}} so'm</div></div>
@@ -159,13 +159,13 @@ textarea{
             <div><div class="label">Muddat</div><div class="value">{{i.term}} oy</div></div>
         </div>
 
-        <div class="label" style="margin-top:16px">Izoh</div>
-        <textarea placeholder="Rad etish sababi (majburiy)"></textarea>
+        <!-- <div class="label" style="margin-top:16px">Izoh</div> -->
+        <!-- <textarea placeholder="Rad etish sababi (majburiy)"></textarea> -->
 
         <div class="actions">
             <button class="danger" onclick="reject({{i.id}})">Rad etish</button>
             <button class="primary" onclick="approve({{i.id}})">Tasdiqlash</button>
-            <button class="ghost" onclick="printLoan(this)">🖨 Chop etish</button>
+            <a class="ghost" style="text-decoration: none;color: black;" href="{% url 'accounting:document' i.id 'accounting_cheque' %}">🖨 Chop etish</a>
         </div>
     </div>
 </div>

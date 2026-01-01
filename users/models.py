@@ -4,11 +4,13 @@ from django.contrib.auth.models import AbstractUser
 roles = (
     ('new','Yangi'),
     ('creditor','Kreditor'),
-    ('accountant','Buxgalter')
+    ('accountant','Buxgalter'),
+    ('admin','Admin')
 )
 
 class Filial(models.Model):
     name = models.CharField(max_length=50)
+    manager = models.CharField(max_length=50,default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
 class User(AbstractUser):

@@ -70,6 +70,7 @@ body{margin:0;background:var(--bg)}
     font-weight:600;
 }
 .approved{background:#dcfce7;color:#166534}
+.rejected{background:#fcdfdc;color:#651616}
 
 .grid-3{
     display:grid;
@@ -138,12 +139,16 @@ textarea{
  {% for i in loans %}
 <div class="loan">
     <div class="loan-header" onclick="toggle(this)">
-        <div><div class="label">Kredit</div><div class="value">#{{i.loan.id}}</div></div>
+        <div><div class="label">Kredit</div><div class="value">№{{i.loan.contract_id}}</div></div>
         <div><div class="label">Mijoz</div><div class="value">{{i.loan.client.full_name}}</div></div>
         <div><div class="label">Jami</div><div class="value">{{i.loan.total_amount|intcomma}} so'm</div></div>
         <div><div class="label">Oylik</div><div class="value">{{i.loan.payment|intcomma}} so'm</div></div>
         <div><div class="label">Tasqidchi</div><div class="value">{{user.full_name}}</div></div>
-        <span class="badge approved">Tasdiqlandi</span>
+        {% if i.loan.status == "done" %}
+            <span class="badge approved">Tasdiqlandi</span>
+        {% else %}
+            <span class="badge rejected">Rad etildi</span>
+        {% endif %}
     </div>
 
     <div class="loan-body">
@@ -155,10 +160,11 @@ textarea{
             <div><div class="label">Chiqim</div><div class="value">{{i.loan.monthly_spending|intcomma}} so'm</div></div>
             <div><div class="label">Muddat</div><div class="value">{{i.loan.term}} oy</div></div>
         </div>
-
-        <div class="actions">
-            <button class="primary" onclick="printLoan(this)">🖨 Chop etish</button>
-        </div>
+        {% if i.loan.status == "done" %}
+            <div class="actions">
+                <a class="primary" style="padding:5px;border-radius:13px;text-decoration: none;color: rgb(255, 255, 255);" href="{% url 'accounting:document' i.loan.id 'accounting_cheque' %}">🖨 Chop etish</a>
+            </div>
+        {% endif %}
     </div>
 </div>
 {% endfor %}

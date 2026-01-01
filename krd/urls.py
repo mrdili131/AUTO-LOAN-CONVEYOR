@@ -6,6 +6,7 @@ urlpatterns = [
     path('',views.IndexView.as_view(),name='home'),
     path('requests/',views.RequestsView.as_view(),name='requests'),
     path('konveyer/<int:id>/',views.KonveyerView.as_view(),name='konveyer'),
+    path('document/<int:id>/<str:doct>/',views.document,name="document"),
 
     # Actions
     path('create_loan/',views.create_request,name='create_loan'),

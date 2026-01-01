@@ -1,0 +1,159 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axborot varaqasi</title>
+</head>
+<body>
+
+<div class="paper">
+    <div class="board">
+        <h1 class="title">Axborot varaqasi</h1>
+
+        <div class="section">
+            <p>Men, <b>{{loan.client.full_name}}</b>, <b>{{loan.product.name}}</b> mahsulotini muddatli to'lov asosida olishni rejalashtirmoqdaman.</p>
+        </div>
+
+        <div class="section">
+            <h3>Shaxsiy ma'lumotlar:</h3>
+            <ul>
+                <li>Tug'ilgan sana: {{loan.client.birth_date|date:"d.m.Y"}}</li>
+                <li>Pasport: {{loan.client.passport_serial}}</li>
+                <li>Telefon: {{loan.client.numbers.all.0.number}}</li>
+                <li>Manzil: {{loan.client.current_address}}</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>Moliyaviy ma'lumotlar:</h3>
+            <ul>
+                <li>Oylik daromad: {{loan.monthly_income|intcomma}} so'm</li>
+                <li>Kredit summasi: {{loan.total_amount|intcomma}} so'm</li>
+                <li>Kredit muddati: {{loan.term}} oy</li>
+                <li>Foiz stavkasi: {{loan.rate}} %</li>
+                <li>Oylik to'lov: {{loan.payment|intcomma}} so'm</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <p>Men barcha yuqoridagi ma'lumotlarning to'g'riligini tasdiqlayman va ushbu axborot varaqasi asosida kredit olish uchun murojaat qilaman.</p>
+        </div>
+
+        <div class="signature">
+            <p>{{loan.client.full_name}}: ____________________</p>
+            <p>Sana: {{loan.start_date|date:"d.m.Y"}}</p>
+            <p>Telefon: {{loan.client.numbers.all.0.number}}</p>
+        </div>
+    </div>
+</div>
+
+<div class="info">
+    <h1>F.I.O: {{loan.client.full_name}}</h1>
+    <p>Hujjat nomi: Axborot varaqasi</p>
+    <p>Hujjat turi: Kreditlash</p>
+    <button onclick="editable()">O'zgartirish</button>
+    <button onclick="window.print()">Chiqarish</button>
+</div>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:'Times New Roman', Times, serif;
+}
+body{
+    background-color: #e0e0e0;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:30px; /* paper va info orasidagi masofa */
+    padding:20px;
+}
+
+/* PAPER */
+.paper{
+    width:210mm;
+    min-height:297mm;
+    background:white;
+    border:1px solid black;
+    padding:40px 50px;
+    display:flex;
+    flex-direction: column;
+    font-size:12pt;
+    line-height:1.5;
+}
+.board{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+}
+.title{
+    text-align:center;
+    margin:20px 0;
+}
+.section{
+    margin-bottom:20px;
+}
+.section h3{
+    margin-bottom:8px;
+    text-decoration:underline;
+}
+.section ul{
+    list-style: none;
+    padding-left:0;
+}
+.section ul li{
+    margin-bottom:5px;
+}
+.signature{
+    margin-top:60px;
+}
+.signature p{
+    margin-bottom:8px;
+}
+
+/* INFO section o‘ngda */
+.info{
+    background:white;
+    padding:10px 15px;
+    border-radius:12px;
+    font-family:'Trebuchet MS', sans-serif;
+    line-height:1.4;
+    font-size:12px; /* kichik */
+    display:flex;
+    flex-direction:column;
+    gap:8px; /* bo‘limlar orasidagi masofa */
+    width:200px;
+    align-self:flex-start;
+}
+
+/* PRINT */
+@media print {
+    body{
+        background:white;
+        display:block;
+        padding:0;
+    }
+    .paper{
+        border:none;
+        width:100%;
+        min-height:auto;
+        padding:40px;
+    }
+    .info{
+        display: none;
+    }
+}
+</style>
+
+<script>
+function editable(){
+    document.querySelector(".paper").setAttribute("contenteditable","true");
+}
+</script>
+
+</body>
+</html>

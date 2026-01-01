@@ -97,13 +97,17 @@ class Loan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self,*args,**kwargs):
+        if (self.id):
+            self.contract_id = f"99{self.id:06}"
+        if (self.product_price == 0 and self.product):
+            self.product_price == self.product.price
         if (
             self.product and
             self.product.price and
-            self.product_price and
             self.start_date and
             self.rate and
-            self.end_date
+            self.end_date and
+            self.status not in ["done","rejected","approved","paid"]
         ):
             months = (self.end_date.year - self.start_date.year) * 12 + (self.end_date.month - self.start_date.month)
             if months <= 0:

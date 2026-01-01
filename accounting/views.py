@@ -20,6 +20,12 @@ class HistoryView(LoginRequiredMixin,View):
         loans = AccountedLoan.objects.filter(filial=request.user.filial)
         return render(request,'accounting/history.html',{"loans":loans})
     
+@role_required('accountant')
+def document(request,id,doct):
+    loan = Loan.objects.get(id=id)
+    if (doct and doct == "accounting_cheque"):
+        return render(request,'accounting/accounting_cheque.html',{"loan":loan})
+    
 
 @login_required
 def done(request):

@@ -38,7 +38,7 @@ nav a.user{color:#fff;text-decoration:none;font-weight:500}
         <option value="/create_loan">Arizani yuborish</option>
         <option value="/requests">Arizalar tarixi</option>
     </select>
-    <a href="#" class="user">{{ user.full_name }}</a>
+    <a href="{% url 'auth:logout' %}" class="user">{{ user.full_name }}</a>
 </nav>
 
 <main class="main">

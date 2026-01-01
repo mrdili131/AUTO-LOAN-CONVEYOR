@@ -28,7 +28,26 @@ class KonveyerView(LoginRequiredMixin,View):
 class RequestsView(LoginRequiredMixin,View):
     def get(self,request):
         loans = Loan.objects.filter(filial=request.user.filial).order_by("-created_at")
-        return render(request,'creditor/ariza.html',{"loans":loans})
+        return render(request,'creditor/history.html',{"loans":loans})
+    
+@role_required('creditor')
+def document(request,id,doct):
+    loan = Loan.objects.get(id=id)
+    if (doct and doct == "graphic"):
+        return render(request,"creditor/graphic.html",{"loan":loan})
+    elif (doct and doct == "agreement"):
+        return render(request,"creditor/agreement.html",{"loan":loan})
+    elif (doct and doct == "request"):
+        return render(request,"creditor/ariza.html",{"loan":loan})
+    elif (doct and doct == "information"):
+        return render(request,"creditor/information.html",{"loan":loan})
+    elif (doct and doct == "contract"):
+        return render(request,"creditor/contract.html",{"loan":loan})
+    elif (doct and doct == "order"):
+        return render(request,"creditor/order.html",{"loan":loan})
+    else:
+        return redirect('home')
+
 
 
 
@@ -57,46 +76,47 @@ def save_data(request):
         id = request.POST.get("id")
         if data and id:
             loan = Loan.objects.get(id=id)
-            product = Product.objects.get(id=int(data["product"]))
-            loan.total_amount = float(data["total_amount"] or 0)
-            loan.product = product
-            loan.product_price = product.price
-            loan.rate = int(data["loan_rate"])
-            loan.monthly_income = int(data["monthly_income"])
-            loan.monthly_spending = int(data["monthly_spending"])
-            loan.scoring = int(data["scoring"])
-            loan.work_type = data["work_type"]
-            loan.loans = int(data["loans"])
-            loan.monthly_loan_payment = int(data["monthly_loan_payment"])
-            loan.end_date = datetime.strptime(data["loan_end_date"], "%Y-%m-%d").date()
+            if loan.status not in ["done","rejected","approved","paid"]:
+                product = Product.objects.get(id=int(data["product"]))
+                loan.total_amount = float(data["total_amount"] or 0)
+                loan.product = product
+                loan.product_price = product.price
+                loan.rate = int(data["loan_rate"])
+                loan.monthly_income = int(data["monthly_income"])
+                loan.monthly_spending = int(data["monthly_spending"])
+                loan.scoring = int(data["scoring"])
+                loan.work_type = data["work_type"]
+                loan.loans = int(data["loans"])
+                loan.monthly_loan_payment = int(data["monthly_loan_payment"])
+                loan.end_date = datetime.strptime(data["loan_end_date"], "%Y-%m-%d").date()
 
-            client, newclient = Client.objects.update_or_create(
-                passport_pinfl = data["client_pinfl"],
-                defaults={
-                "first_name": data["first_name"],
-                "last_name": data["last_name"],
-                "middle_name": data["middle_name"],
-                "gender": data["gender"],
-                "passport_serial": data["passport_serial"],
-                "passport_got_date": timify(data["passport_got_date"]),
-                "passport_expiry_date": timify(data["passport_expiry_date"]),
-                "passport_got_region": data["passport_got_region"],
-                "current_address": data["current_address"],
-                "birth_date": timify(data["birth_date"]),
-                "gov_address": data["gov_address"],
-                "location": data["location"],
-                "description": data["description"],
-                "filial": request.user.filial
-                }
-            )
-            if loan.client is None:
-                newclient = Client.objects.get(passport_pinfl=data["client_pinfl"])
-                loan.client = newclient
+                client, newclient = Client.objects.update_or_create(
+                    passport_pinfl = data["client_pinfl"],
+                    defaults={
+                    "first_name": data["first_name"],
+                    "last_name": data["last_name"],
+                    "middle_name": data["middle_name"],
+                    "gender": data["gender"],
+                    "passport_serial": data["passport_serial"],
+                    "passport_got_date": timify(data["passport_got_date"]),
+                    "passport_expiry_date": timify(data["passport_expiry_date"]),
+                    "passport_got_region": data["passport_got_region"],
+                    "current_address": data["current_address"],
+                    "birth_date": timify(data["birth_date"]),
+                    "gov_address": data["gov_address"],
+                    "location": data["location"],
+                    "description": data["description"],
+                    "filial": request.user.filial
+                    }
+                )
+                if loan.client is None:
+                    newclient = Client.objects.get(passport_pinfl=data["client_pinfl"])
+                    loan.client = newclient
+                    loan.save()
+                    return JsonResponse({"status":True})
+                loan.client = client
                 loan.save()
                 return JsonResponse({"status":True})
-            loan.client = client
-            loan.save()
-            return JsonResponse({"status":True})
     
 @login_required
 def add_client(request):
@@ -173,6 +193,8 @@ def reject(request):
             return JsonResponse({"status":False,"msg":"Bu shartnoma rad etilgan"})
         elif loan.status == "done":
             return JsonResponse({"status":False,"msg":"Bu shartnoma bajarilgan"})
+        elif loan.status == "paid":
+            return JsonResponse({"status":False,"msg":"Bu shartnoma tugatilgan"})
         else:
             loan.status = "rejected"
             loan.save()

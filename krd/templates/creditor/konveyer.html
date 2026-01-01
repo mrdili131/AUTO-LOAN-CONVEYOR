@@ -13,7 +13,7 @@
 <!-- ================= TOP BAR ================= -->
 <header class="topbar">
     <div>
-        <h1>LISA - LOAN CONVEYOR</h1>
+        <h1>LISA - LOAN CONVEYOR | №{{loan.contract_id}}</h1>
         <span class="subtitle">LISA CONVEYOR BY DIZENSTUDIOS</span>
     </div>
     <div class="user-box">{{ user.full_name }}</div>
@@ -224,9 +224,12 @@
 <section class="tab">
 <h2>Hujjatlar</h2>
 <div class="card">
-    <div class="doc">Shartnoma <button id="to_pdf" class="primary">PDF</button></div>
-    <div class="doc">Rozilik xati <button id="to_pdf" class="primary">PDF</button></div>
-    <div class="doc">Axborot varaqasi <button id="to_pdf" class="primary">PDF</button></div>
+    <div class="doc">Ariza <a href="{% url 'document' loan.id 'request' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
+    <div class="doc">Rozilik xati <a href="{% url 'document' loan.id 'agreement' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
+    <div class="doc">Axborot varaqasi <a href="{% url 'document' loan.id 'information' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
+    <div class="doc">Shartnoma <a href="{% url 'document' loan.id 'contract' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
+    <div class="doc">To'lov grafigi <a href="{% url 'document' loan.id 'graphic' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
+    <div class="doc">Farmoyish <a href="{% url 'document' loan.id 'order' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
 </div>
 </section>
 
@@ -254,7 +257,7 @@
 <!-- ================= JS ================= -->
 <script>
 
-    if ("{{loan.status}}" === "rejected" || "{{loan.status}}" === "done" || "{{loan.status}}" === "approved"){
+    if ("{{loan.status}}" === "rejected" || "{{loan.status}}" === "done" || "{{loan.status}}" === "approved" || "{{loan.status}}" === "paid"){
         document.querySelectorAll('.tab').forEach(f=>{
             f.querySelectorAll('input,select,button').forEach(i=>{
                 if(

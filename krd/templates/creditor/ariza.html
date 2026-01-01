@@ -1,132 +1,154 @@
-{% load static %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arizalar Tarixi – ALS</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-    --primary:#0f6b3d;
-    --bg:#f4f6f8;
-    --card-bg:#fff;
-    --border:#dcdfe4;
-}
-*{box-sizing:border-box;font-family:Inter;margin:0;padding:0}
-body{background:var(--bg)}
-nav{background:var(--primary);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
-nav h1 a{color:#fff;text-decoration:none}
-nav select{padding:8px;border-radius:8px;border:none;font-size:14px;cursor:pointer}
-nav a.user{color:#fff;text-decoration:none;font-weight:500}
-.main{padding:24px}
-.card{background:var(--card-bg);padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.05);margin-bottom:20px}
-.search-bar{margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap}
-.search-bar input{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border)}
-.search-bar button{padding:10px 20px;background:var(--primary);color:#fff;border:none;border-radius:12px;cursor:pointer}
-table{width:100%;border-collapse:collapse}
-th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--border)}
-th{background:#f0f0f0;color:#333}
-tr:hover{background:#eef2f3}
-.view-btn{padding:6px 12px;background:#0f6b3d;color:#fff;border:none;border-radius:8px;cursor:pointer}
-.no-data{text-align:center;color:#555;padding:20px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIZENDOC</title>
 </head>
 <body>
+    <div class="paper">
+        <div class="board">
+            <h3 class="top-right">Fuqaro {{loan.client.full_name}}<br>JSHSHIR raqami: {{loan.client.passport_pinfl}} dan
+                <br>"DIZENSTUDIOS" MCHJ {{loan.filial.name}} filiali <br> boshqaruvchisi {{loan.filial.manager}} <br>  ga
+            </h3>
 
-<nav>
-    <h1><a href="/">LISA - LOAN CONVEYOR</a></h1>
-    <select onchange="navigate(this)">
-        <option value="/">-------------------</option>
-        <option value="/">Menyu</option>
-        <option value="/create_loan">Arizani yuborish</option>
-        <option value="/requests">Arizalar tarixi</option>
-    </select>
-    <a href="#" class="user">{{ user.full_name }}</a>
-</nav>
-
-<main class="main">
-    <div class="card">
-        <h2>Arizalar Tarixi</h2>
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="PINFL yoki Ism bo‘yicha izlash">
-            <button onclick="searchTable()">Qidirish</button>
+            <br><br><br><br><br>
+            <h1>Ariza</h1>
+                <p>
+                    Men {{loan.client.full_name}}ga {{loan.rate}} foiz ustama qo'shib to'lash asosida
+                    {{loan.product.name}} maxsulotini {{loan.rate}} oy muddatiga bo'ib to'lash imkoniyatida berishingizni
+                    so'rayman. Mening jami daromadim {{loan.monthly_income|intcomma}} so'mni tashkil qiladi.
+                    <br><br>
+                    Menga tegishni plastik kartalarimni muddatli to'lovni so'ndirish maqsadida ulashingizga rozilik bildiraman.
+                    Tolovni undirish uchun menga bog'lanishishgizga rozilik bildiraman. Mening ma'lumotlarimni qayta ishlash, to'plash,
+                    yangilashingiz uchun ruxsat beraman.
+                    <br><br>
+                    Agarda ma'lumotlarda xatolik chiqsa yoki mening shaxsiy ma'lumotlarim kreditlash uchun yetarli holatda bo'lmasa
+                    muddatli to'lov hujjati rad etilishi mumkinligini va bu ariza hujjat bitirilishini kafolatlamasligini bilaman.
+                </p>
+                <br><br><br><br><br>
+                <div class="left" style="margin-top: 600px;">
+                    <h3>{{loan.client.full_name}}: _________________</h3>
+                    <h3>Sana: {{loan.start_date|date:"d.m.Y"}}</h3>
+                    <h3>Tel. raqami: {{loan.client.numbers.all.0.number}}</h3>
+                </div>
         </div>
-
-        <table id="historyTable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Mijoz F.I.O</th>
-                    <th>PINFL</th>
-                    <th>Mahsulot</th>
-                    <th>Jami summa</th>
-                    <th>Filial</th>
-                    <th>Status</th>
-                    <th>Amallar</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Example static data -->
-                 {% for i in loans %}
-                <tr>
-                    <td>{{i.id}}</td>
-                    <td>{{i.client.full_name}}</td>
-                    <td>{{i.client.passport_pinfl}}</td>
-                    <td>{{i.product.name}}</td>
-                    <td>{{i.total_amount|intcomma}} so‘m</td>
-                    <td>{{i.filial.name}}</td>
-                    {% if i.status == "pending" %}
-                        <td style="color: rgb(189, 189, 10);">Jarayonda</td>
-                    {% elif i.status == "rejected" %}
-                        <td style="color: rgb(184, 0, 0);">Rad etilgan</td>
-                    {% elif i.status == "paid" %}
-                        <td style="color: rgb(0, 0, 0);">Yopilgan</td>
-                    {% elif i.status == "done" %}
-                        <td style="color: rgb(32, 206, 90);">Berilgan</td>
-                    {% elif i.status == "approved" %}
-                        <td style="color: rgb(145, 127, 28);">Berilgan</td>
-                    {% endif %}
-                    <td><a href="{% url 'konveyer' i.id %}" style="text-decoration: none;" class="view-btn" onclick="viewRequest(1)">View</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p id="noData" class="no-data" style="display:none;">Hech qanday ariza topilmadi.</p>
     </div>
-</main>
-
-<script>
-function navigate(sel){
-    if(sel.value) window.location.href = sel.value;
-}
-
-// ===== SEARCH FUNCTION =====
-function searchTable(){
-    const input = document.getElementById("searchInput").value.toLowerCase();
-    const table = document.getElementById("historyTable");
-    const rows = table.getElementsByTagName("tr");
-    let visibleCount = 0;
-
-    for(let i=1;i<rows.length;i++){
-        const cells = rows[i].getElementsByTagName("td");
-        let match = false;
-        for(let j=1;j<=2;j++){ // F.I.O or PINFL
-            if(cells[j].innerText.toLowerCase().includes(input)){
-                match = true;
-                break;
-            }
-        }
-        rows[i].style.display = match ? "" : "none";
-        if(match) visibleCount++;
-    }
-
-    document.getElementById("noData").style.display = visibleCount===0 ? "block" : "none";
-}
-
-// ===== VIEW REQUEST =====
-</script>
-
+    <div class="info">
+        <h1>F.I.O: {{loan.client.full_name}}</h1>
+        <p>Hujjat nomi: Ariza</p>
+        <p>Hujjat turi: Kreditlash</p>
+        <button onclick="editable()">O'zgartirish</button>
+        <button onclick="window.print()">Chiqarish</button>
+    </div>
 </body>
 </html>
+
+<style>
+    *{
+        
+    }
+    body{
+        background-color: rgb(224, 224, 224);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap:50px;
+    }
+    .paper{
+        background-color: white;
+        border:1px solid black;
+        width:210mm;
+        height: 297mm;
+        border: 1px solid black;
+        font-size: 12pt;
+        line-height: 1.4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+        font-family:'Times New Roman', Times, serif;
+    }
+    .board{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 60px;
+        font-size: 15px;
+    }
+    .info{
+        background-color: rgb(255, 255, 255);
+        padding: 15px;
+        border-radius: 12px;
+        font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+    }
+    h1, h2, p{
+        page-break-inside: avoid;
+        word-wrap: brea;
+        overflow-wrap: break-word;
+    }
+
+    table{
+        border:1px solid gray;
+        border-radius: 13px;
+        padding: 10px;
+        background-color: rgb(248, 248, 248);
+        font-size: 20px;
+    }
+    .title{
+        background-color: rgb(0, 0, 0);
+        color: white;
+    }
+    td{
+        border: 1px solid gray;
+        padding: 5px;
+    }
+
+    .top-right{
+        top:30px;
+        right:60px;
+        position: absolute;
+        text-align: right;
+    }
+    .left{
+        position:absolute;
+        left: 60px;
+        bottom: 480px;
+        text-align: left;
+    }
+
+    @media print {
+        @page{
+            size: A4 portrait;
+            margin: 0;
+        }
+        body * {
+            visibility: hidden;
+        }
+        body{
+            margin: 0;
+            padding: 0;
+            display: block;
+            background:white;
+        }
+        .paper, .paper *{
+            visibility: visible;
+        }
+        .board{
+            visibility: visible;
+        }
+        .paper{
+            border: none;
+            position: static;
+        }
+    }
+</style>
+
+<script>
+    function editable(){
+        document.querySelector(".paper").setAttribute("contenteditable","true")
+    }
+</script>
