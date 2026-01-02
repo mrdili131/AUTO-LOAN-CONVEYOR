@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ALS – Auto Loan System</title>
+<title>LKRD – Auto Loan System</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
@@ -57,8 +57,8 @@
         <input id="loan_rate" value="{{ loan.rate }}">
     </div>
     <div class="field">
-        <label>Foiz bilan jami summa</label>
-        <input id="total_amount" readonly value="{{ loan.amount }}">
+        <label>Kunlik jarima foizi</label>
+        <input id="loan_fine" value="{{ loan.fine }}">
     </div>
     <div class="field">
         <label>Boshlanish sanasi</label>
@@ -67,6 +67,14 @@
     <div class="field">
         <label>Tugash sanasi</label>
         <input id="loan_end_date" type="date" value="{{ loan.end_date|date:'Y-m-d' }}">
+    </div>
+    <div class="field">
+        <label>To'lov sanasi</label>
+        <input id="payday" type="number" value="{{ loan.payday }}">
+    </div>
+    <div class="field">
+        <label>Foiz bilan jami summa</label>
+        <input id="total_amount" readonly value="{{ loan.amount }}">
     </div>
     <div class="field">
         <label>Oylik to‘lov</label>
@@ -147,11 +155,11 @@
 
 <!-- ===== TAB 3 ===== -->
 <section class="tab">
-<h2>Telefon va kartalar</h2>
+<h2>Telefon</h2>
 <div class="card">
 
     <!-- ===== ADD CARD ===== -->
-    <h3>Karta qo‘shish</h3>
+    <!-- <h3>Karta qo‘shish (Tayyor emas)</h3>
     <div class="add-form grid-3">
         <div class="field">
             <label>Karta raqami</label>
@@ -164,10 +172,10 @@
         <div class="field" style="align-self:end;">
             <button class="primary" onclick="addCard()">Qo‘shish</button>
         </div>
-    </div>
+    </div> -->
 
     <!-- LIST OF CARDS -->
-    <div id="card_list" style="margin-top:10px; display:flex;flex-direction:column; gap:10px;">
+    <!-- <div id="card_list" style="margin-top:10px; display:flex;flex-direction:column; gap:10px;">
         <div class="doc">
             <span>💳 Uzcard **** 8844</span>
             <span>Asosiy karta</span>
@@ -175,7 +183,7 @@
         </div>
     </div>
 
-    <hr style="margin:20px 0; border:1px dashed #ccc;">
+    <hr style="margin:20px 0; border:1px dashed #ccc;"> -->
 
     <!-- ===== ADD PHONE ===== -->
     <h3>Telefon qo‘shish</h3>
@@ -214,8 +222,9 @@
     <p><b>Mijoz:</b> {{ loan.client.full_name }}</p>
     <p><b>Mahsulot:</b> {{ loan.product.name }}</p>
     <p><b>Jami summa:</b> {{ loan.amount|intcomma }} so‘m</p>
-    <p><b>Oylik to‘lov:</b> {{loan.payment|intcomma}} so'm <span id="confirm_monthly"></span></p>
-    <p><b>Muddati:</b> {{ loan.term }}</p>
+    <p><b>Oylik to‘lov:</b> {{loan.payment|intcomma}} so'm</p>
+    <p><b>Muddati:</b> {{ loan.term }} oy</p>
+    <p><b>To'lov sanasi:</b> {{ loan.payday }}</p>
     
 </div>
 </section>
@@ -465,26 +474,61 @@ function spawnAlert(text,type='info'){
 function calculateMonthlyPayment(){
     const principal = parseFloat(document.getElementById("price").value);
     const rateYear  = parseFloat(document.getElementById("loan_rate").value);
-    const start     = new Date(document.getElementById("loan_start_date").value);
-    const end       = new Date(document.getElementById("loan_end_date").value);
+    const startStr  = document.getElementById("loan_start_date").value;
+    const endStr    = document.getElementById("loan_end_date").value;
+    const payday    = parseInt(document.getElementById("payday").value);
 
-    if(!principal || !rateYear || !end) return;
+    if(!principal || !rateYear || !startStr || !endStr || !payday) return;
 
-    let months = (end.getFullYear()-start.getFullYear())*12 + (end.getMonth()-start.getMonth());
-    if(months <= 0) return;
+    const start = new Date(startStr);
+    const end   = new Date(endStr);
 
-    // Simple interest calculation
+    if(end <= start) return;
+
+    // ===== TOTAL WITH INTEREST (simple yearly) =====
     const total = principal + (principal * rateYear / 100);
-    const monthly = total / months;
 
-    document.getElementById("monthly_payment").value = Math.round(monthly).toLocaleString("ru-RU")+" so‘m";
-    document.getElementById("amount").value = Math.round(total);
-    document.getElementById("confirm_monthly").innerText = Math.round(monthly).toLocaleString("ru-RU")+" so‘m";
+    // ===== COUNT REAL PAYMENT DATES =====
+    let count = 0;
+    let cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+
+    while(cursor <= end){
+        const year = cursor.getFullYear();
+        const month = cursor.getMonth();
+
+        // last day of month (Feb, 30/31 handled)
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        const day = Math.min(payday, lastDay);
+
+        const dueDate = new Date(year, month, day);
+
+        if(dueDate >= start && dueDate <= end){
+            count++;
+        }
+
+        cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    if(count === 0) return;
+
+    const monthly = total / count;
+
+    // ===== UI UPDATE =====
+    document.getElementById("monthly_payment").value =
+        Math.round(monthly).toLocaleString("ru-RU") + " so‘m";
+
+    document.getElementById("confirm_monthly").innerText =
+        Math.round(monthly).toLocaleString("ru-RU") + " so‘m";
+
+    // (optional) save hidden values for backend
+    window._lkrd_payment_count = count;
+    window._lkrd_total_amount = Math.round(total);
 }
 
 
 document.getElementById("loan_end_date").addEventListener("change", calculateMonthlyPayment);
-document.getElementById("rate").addEventListener("input", calculateMonthlyPayment);
+document.getElementById("loan_rate").addEventListener("input", calculateMonthlyPayment);
+document.getElementById("payday").addEventListener("input", calculateMonthlyPayment);
 window.onload = calculateMonthlyPayment;
 
 

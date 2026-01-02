@@ -1,159 +1,157 @@
 {% load humanize %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DIZENDOC</title>
+    <meta charset="UTF-8">
+    <title>DIZENDOC – To‘lov grafigi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
-    <div class="paper">
-        <div class="board">
-            <h1>To'lov grafigi</h1>
-            <p> {{loan.client.full_name}} uchun
-                <br><strong>№{{loan.contract_id}}</strong>-chi shartnoma raqami asosida tuzilgan kredit to‘lov grafiki </p>
 
-            <table id="schedule-table">
-                <tr class="title">
-                    <th>№</th>
-                    <th>Hisoblangan foizlarini qaytarish summasi</th>
-                    <th>Qaytariladigan asosiy qarz summasi</th>
-                    <th>Bir oylik jami to‘lov summasi</th>
-                    <th>To‘lovdan keyingi asosiy qarz summasi</th>
-                </tr>
-                <!-- JS will fill rows here -->
-            </table>
-            <br>
-            <p><strong>Qarz beruvchi:</strong> {{loan.filial.manager}}: __________________</p>
-            <p><strong>Qarz oluvchi:</strong> {{loan.client.full_name}}: __________________</p>
-        </div>
-    </div>
+<div class="paper">
+    <div class="board">
 
-    <div class="info">
-        <h1>F.I.O: {{loan.client.full_name}}</h1>
-        <p>Hujjat nomi: Kredit to'lov grafigi</p>
-        <p>Hujjat turi: Kreditlash</p>
-        <p>To'iq summa: {{loan.total_amount|intcomma}} so'm</p>
-        <p>Foizi: {{loan.rate}}%</p>
-        <p>Muddati: {{loan.term}} oy</p>
-        <button onclick="editable()">O'zgartirish</button>
-        <button onclick="window.print()">Chiqarish</button>
+        <h1>To‘lov grafigi</h1>
+
+        <p>
+            {{ loan.client.full_name }} uchun <br>
+            <strong>№{{ loan.contract_id }}</strong>-chi shartnoma asosida tuzilgan kredit to‘lov grafigi
+        </p>
+
+        <table>
+            <tr class="title">
+                <th>№</th>
+                <th>To‘lov sanasi</th>
+                <th>Bir oylik to‘lov</th>
+                <th>Jarima</th>
+                <th>Jami to‘lov (Jarima bilan)</th>
+                <th>Holati</th>
+            </tr>
+
+            {% for pm in loan.payment_months.all|dictsort:"month" %}
+            <tr>
+                <td>{{ pm.month }}</td>
+
+                <td>
+                    {{ pm.payment_date|date:"d.m.Y" }}
+                </td>
+
+                <td>
+                    {{ pm.payment|intcomma }} so‘m
+                </td>
+
+                <td>
+                    {% if pm.penalty > 0 %}
+                        {{ pm.penalty|intcomma }} so‘m
+                    {% else %}
+                        0
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{ pm.payment|add:pm.penalty|intcomma }} so‘m
+                </td>
+
+                <td>
+                    {% if pm.is_paid %}
+                        ✅ To‘langan
+                    {% else %}
+                        ❌ To‘lanmagan
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <br><br>
+
+        <p><strong>Qarz beruvchi:</strong> {{ loan.filial.manager }} __________________</p>
+        <p><strong>Qarz oluvchi:</strong> {{ loan.client.full_name }} __________________</p>
+
     </div>
+</div>
+
+<div class="info">
+    <h2>Ma’lumotlar</h2>
+    <p><strong>F.I.O:</strong> {{ loan.client.full_name }}</p>
+    <p><strong>Kredit summasi:</strong> {{ loan.total_amount|intcomma }} so‘m</p>
+    <p><strong>Foiz:</strong> {{ loan.rate }}%</p>
+    <p><strong>Muddat:</strong> {{ loan.term }} oy</p>
+
+    <button onclick="enableEdit()">O‘zgartirish</button>
+    <button onclick="window.print()">Chop etish</button>
+</div>
+
 </body>
 </html>
 
+
 <style>
-*{
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-body{
-    background-color: rgb(224, 224, 224);
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: center;
-    gap:50px;
-}
-.paper{
-    background-color: white;
-    border:1px solid black;
-    width:794px;
-    height: fit-content;
-    font-size: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-}
-.board{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    font-size: 15px;
-}
-.info{
-    background-color: rgb(255, 255, 255);
-    padding: 15px;
-    border-radius: 12px;
-}
-h1, h2, p{
-    page-break-inside: avoid;
-    overflow-wrap: break-word;
+* {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
-table{
-    border:1px solid gray;
-    border-radius: 13px;
-    padding: 10px;
-    background-color: rgb(248, 248, 248);
-    font-size: 20px;
-    width: 100%;
+body {
+    background: #e4e4e4;
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    padding: 20px;
 }
-.title{
-    background-color: rgb(0, 0, 0);
+
+.paper {
+    background: white;
+    width: 794px;
+    border: 1px solid #000;
+}
+
+.board {
+    padding: 30px;
+    text-align: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.title {
+    background: black;
     color: white;
 }
-td{
-    border: 1px solid gray;
-    padding: 5px;
+
+th, td {
+    border: 1px solid #aaa;
+    padding: 8px;
+    font-size: 14px;
+}
+
+.info {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    height: fit-content;
 }
 
 @media print {
-    @page{
-        size: A4 portrait;
-        margin: 20mm;
-    }
     body * {
         visibility: hidden;
     }
-    .paper, .paper *{
+    .paper, .paper * {
         visibility: visible;
     }
-    .board{
-        visibility: visible;
-    }
-    .paper{
-        transform: scale(0.85);
-        transform-origin: top left;
-        height: auto;
+    .paper {
         position: absolute;
         left: 0;
         top: 0;
-        width: 100%;
-        border:0;
+        border: none;
     }
 }
 </style>
-
 <script>
-function editable(){
-    document.querySelector(".paper").setAttribute("contenteditable","true");
-}
-
-// Loan object from Django
-const loan = {
-    rate: {{loan.rate}},            // annual %
-    total_amount: {{loan.total_amount}},  // principal
-    payment: {{loan.payment}},      // monthly payment
-    term: {{loan.term}}             // months
-};
-
-const table = document.getElementById("schedule-table");
-let remaining = loan.total_amount;
-
-for(let i=1; i<=loan.term; i++){
-    const interest = remaining * loan.rate / 12 / 100;
-    const principal = loan.payment - interest;
-    remaining -= principal;
-    if(remaining < 0) remaining = 0;
-
-    const row = table.insertRow();
-    row.insertCell(0).innerText = i;
-    row.insertCell(1).innerText = Math.round(interest).toLocaleString() + " UZS";
-    row.insertCell(2).innerText = Math.round(principal).toLocaleString() + " UZS";
-    row.insertCell(3).innerText = Math.round(loan.payment).toLocaleString() + " UZS";
-    row.insertCell(4).innerText = Math.round(remaining).toLocaleString() + " UZS";
+function enableEdit() {
+    document.querySelector(".paper").setAttribute("contenteditable", "true");
 }
 </script>

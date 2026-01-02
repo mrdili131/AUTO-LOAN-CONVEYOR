@@ -89,6 +89,8 @@ def save_data(request):
                 loan.loans = int(data["loans"])
                 loan.monthly_loan_payment = int(data["monthly_loan_payment"])
                 loan.end_date = datetime.strptime(data["loan_end_date"], "%Y-%m-%d").date()
+                loan.payday = int(data["payday"])
+                loan.fine = int(data["loan_fine"])
 
                 client, newclient = Client.objects.update_or_create(
                     passport_pinfl = data["client_pinfl"],
@@ -116,6 +118,8 @@ def save_data(request):
                     return JsonResponse({"status":True})
                 loan.client = client
                 loan.save()
+                return JsonResponse({"status":True})
+            else:
                 return JsonResponse({"status":True})
     
 @login_required
@@ -181,9 +185,7 @@ def approve(request):
                 loan.save()
                 return JsonResponse({"status":True,"msg":"Mijozni buxgalteriyaga jo'nating!"})
             
-            
-
-            
+             
 @login_required
 def reject(request):
     if request.method == "POST":
