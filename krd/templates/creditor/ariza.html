@@ -1,3 +1,4 @@
+{% load static %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
@@ -5,12 +6,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DIZENDOC</title>
+    <link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
 </head>
 <body>
     <div class="paper">
         <div class="board">
             <h3 class="top-right">Fuqaro {{loan.client.full_name}}<br>JSHSHIR raqami: {{loan.client.passport_pinfl}} dan
-                <br>"DIZENSTUDIOS" MCHJ {{loan.filial.name}} filiali <br> boshqaruvchisi {{loan.filial.manager}} <br>  ga
+                <br>{{loan.filial.company.name}} {{loan.filial.name}} filiali <br> boshqaruvchisi {{loan.filial.manager}} <br>  ga
             </h3>
 
             <br><br><br><br><br>

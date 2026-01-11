@@ -1,0 +1,147 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIZENDOC</title>
+    <link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+</head>
+<body>
+    <div class="paper">
+        <div class="board">
+            <h1>№{{loan.contract_id}}</h1>
+            <h1>{{loan.client.full_name}}</h1>
+            <h1>"{{loan.filial.company.name}}"</h1>
+            <h1>{{loan.filial.name}}</h1>
+            <br><br><br>
+            <div class="container">
+                <h2>Mahsulot: {{loan.product.name}}</h2>
+                <h2>Muddati: {{loan.term}} oy</h2>
+                <h2>Boshlanish sanasi: {{loan.start_date|date:"d.m.Y"}}</h2>
+                <h2>Tugash sanasi: {{loan.end_date|date:"d.m.Y"}}</h2>
+                <br>
+                <h2>Kreditor: {{loan.user.full_name}}</h2>
+            </div>
+                <br><br><br><br>
+                <h1>2025 yil</h1>
+        </div>
+    </div>
+    <div class="info">
+        <h1>F.I.O: {{loan.client.full_name}}</h1>
+        <p>Hujjat nomi: Betlik</p>
+        <p>Hujjat turi: Kreditlash</p>
+        <button onclick="editable()">O'zgartirish</button>
+        <button onclick="window.print()">Chiqarish</button>
+    </div>
+</body>
+</html>
+
+<style>
+    *{
+
+    }
+    body{
+        background-color: rgb(224, 224, 224);
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap:50px;
+    }
+    .paper{
+        background-color: white;
+        border:1px solid black;
+        width:210mm;
+        height: 297mm;
+        border: 1px solid black;
+        font-size: 12pt;
+        line-height: 1.4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+        font-family:'Times New Roman', Times, serif;
+    }
+    .board{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 60px;
+        font-size: 15px;
+    }
+    .info{
+        background-color: rgb(255, 255, 255);
+        padding: 15px;
+        border-radius: 12px;
+        font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif
+    }
+    h1, h2, p{
+        page-break-inside: avoid;
+        word-wrap: brea;
+        overflow-wrap: break-word;
+    }
+
+    table{
+        border:1px solid gray;
+        border-radius: 13px;
+        padding: 10px;
+        background-color: rgb(248, 248, 248);
+        font-size: 20px;
+    }
+    .title{
+        background-color: rgb(0, 0, 0);
+        color: white;
+    }
+    td{
+        border: 1px solid gray;
+        padding: 5px;
+    }
+
+    .top-right{
+        top:30px;
+        right:60px;
+        position: absolute;
+        text-align: right;
+    }
+    .left{
+        position:absolute;
+        left: 60px;
+        bottom: 650px;
+        text-align: left;
+    }
+
+    @media print {
+        @page{
+            size: A4 portrait;
+            margin: 0;
+        }
+        body * {
+            visibility: hidden;
+        }
+        body{
+            margin: 0;
+            padding: 0;
+            display: block;
+            background:white;
+        }
+        .paper, .paper *{
+            visibility: visible;
+        }
+        .board{
+            visibility: visible;
+        }
+        .paper{
+            border: none;
+            position: static;
+        }
+    }
+</style>
+
+<script>
+    function editable(){
+        document.querySelector(".paper").setAttribute("contenteditable","true")
+    }
+</script>

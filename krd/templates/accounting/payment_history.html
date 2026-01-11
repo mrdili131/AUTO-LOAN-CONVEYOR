@@ -1,0 +1,62 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowFin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/accounting/payment_history.css' %}">
+<link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+</head>
+<body>
+
+<header>
+  <a href="{% url 'accounting:home' %}" style="text-decoration:none;color:#fff;">
+    <h2>📊 Kredit To‘lovlari (Ko‘rish)</h2>
+  </a>
+</header>
+
+<div class="container">
+
+  <!-- LOAN INFO -->
+  <div class="loan-info">
+    <div><b>Mijoz:</b> {{loan.client.full_name}}</div>
+    <div><b>Kredit №:</b> {{loan.contract_id}}</div>
+    <div><b>Oylik to‘lov:</b> {{loan.payment|intcomma}} so‘m</div>
+    <div><b>Muddat:</b> {{loan.term}} oy</div>
+  </div>
+
+  <!-- MONTHS TABLE -->
+  <div class="months">
+    {% for i in payments %}
+      <div class="month">
+        <div>
+          <div class="label">To‘langan sana</div>
+          <div class="value">{{i.paid_date|date:"d.m.Y"}}</div>
+        </div>
+        <div>
+          <div class="label">To‘lov summasi</div>
+          <div class="value">{{ i.amount|intcomma }} so'm</div>
+        </div>
+        <a href="{% url 'accounting:payment_cheque' i.id %}">Chekni chiqarish</a>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<script>
+function pay(id){
+    let amount = document.getElementById("amount").value
+    if(amount > 0){
+        let url = `/accounting/pay/${id}/${amount}`
+        fetch(url)
+        setTimeout(()=>{ window.location.reload() },500)
+    }
+}
+</script>
+
+</body>
+</html>

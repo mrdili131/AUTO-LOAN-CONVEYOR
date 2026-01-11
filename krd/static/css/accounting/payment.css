@@ -1,0 +1,73 @@
+:root{--p:#0f6b3d;--bd:#dcdfe4;--bg:#f4f6f8}
+*{box-sizing:border-box;font-family:Inter}
+body{margin:0;background:var(--bg)}
+
+header{
+  background:linear-gradient(135deg,#0f6b3d,#094a29);
+  color:#fff;padding:18px 24px
+}
+
+.container{max-width:1000px;margin:auto;padding:24px}
+
+/* SEARCH UI ONLY */
+.search{
+  display:flex;gap:10px;margin-bottom:20px
+}
+.search input{
+  flex:1;padding:12px;border-radius:12px;border:1px solid var(--bd)
+}
+.search button{
+  padding:12px 16px;border-radius:12px;
+  border:none;background:#0f6b3d;color:#fff
+}
+
+/* INFO */
+.loan-info{
+  background:#fff;border-radius:16px;
+  padding:18px;border:1px solid var(--bd);
+  margin-bottom:16px
+}
+
+/* PAYMENT BAR */
+.controls{
+  background:#fff;border-radius:16px;
+  padding:16px;border:1px solid var(--bd);
+  margin-bottom:16px;
+  display:flex;gap:10px;flex-wrap:wrap
+}
+.controls input{
+  flex:1;padding:12px;border-radius:12px;border:1px solid var(--bd)
+}
+.controls button{
+  padding:12px 16px;border-radius:12px;
+  border:none;
+}
+.primary{background:#0f6b3d;color:#fff}
+.danger{background:#b91c1c;color:#fff}
+
+/* MONTHS */
+.months{
+  background:#fff;border-radius:16px;
+  border:1px solid var(--bd);overflow:hidden
+}
+.month{
+  display:grid;
+  grid-template-columns:80px 1fr 1fr 1fr;
+  gap:10px;padding:14px 16px;
+  border-bottom:1px solid var(--bd)
+}
+.month:last-child{border-bottom:none}
+
+.badge{
+  padding:6px 10px;border-radius:20px;
+  font-size:12px;font-weight:700
+}
+.paid{background:#dcfce7;color:#166534}
+.unpaid{background:#fef3c7;color:#92400e}
+.overdue{background:#fee2e2;color:#991b1b}
+
+.label{font-size:12px;color:#555}
+.value{font-weight:700}
+#cheques-btn{padding: 5px;border-radius: 12px;font-size: 12px;text-decoration: none;color: white;
+display: flex;flex-direction: row;align-items: center;justify-content: center;
+}

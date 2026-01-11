@@ -1,0 +1,187 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To‘lov Cheki</title>
+<link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:'Times New Roman', Times, serif;
+}
+body{
+    background-color: #e0e0e0;
+    display:flex;
+    justify-content:center;
+    padding:20px;
+}
+
+.cheque{
+    width:350mm;
+    max-width:100%;
+    background:white;
+    border:2px solid #000;
+    border-radius:12px;
+    padding:30px 40px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    font-size:12pt;
+    line-height:1.5;
+    position: relative;
+}
+
+/* Bank Header */
+.bank-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.bank-header .bank-name{
+    font-weight:bold;
+    font-size:18pt;
+}
+
+.bank-header .cheque-no{
+    font-size:14pt;
+}
+
+/* Amount Boxes */
+.amount-box{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:15px 0;
+}
+
+.amount-box .label{
+    font-weight:bold;
+}
+
+.amount-box .value{
+    border:1px solid #000;
+    padding:8px 12px;
+    min-width:200px;
+    text-align:right;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
+/* Client Info */
+.section{
+    margin-bottom:15px;
+}
+
+.section p{
+    margin-bottom:8px;
+}
+
+/* Signature Lines */
+.signatures{
+    display:flex;
+    justify-content:space-between;
+    margin-top:50px;
+}
+
+.signatures .sign{
+    text-align:center;
+}
+
+.signatures .sign .line{
+    border-top:1px solid #000;
+    width:250px;
+    margin:0 auto 5px;
+}
+
+.signatures .sign span{
+    font-size:10pt;
+}
+
+/* Amount in Words */
+.words{
+    margin-top:10px;
+    font-style:italic;
+    font-weight:600;
+}
+
+/* Optional info panel */
+.info-panel{
+    background:#f9f9f9;
+    padding:10px 15px;
+    border-radius:12px;
+    font-size:10pt;
+    margin-top:20px;
+}
+
+@media print {
+    body{background:white;}
+    .info-panel{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="cheque">
+
+    <!-- Bank Header -->
+    <div class="bank-header">
+        <div class="bank-name">{{payment.loan.filial.company.name}}</div>
+        <div class="cheque-no">CHEK №{{payment.id}}</div>
+    </div>
+
+    <!-- Date -->
+    <p style="text-align:right;">Sana: {{payment.paid_date|date:"d.m.Y"}}</p>
+
+    <!-- Payee -->
+    <div class="section">
+        <p>Men, <b>{{user.full_name}}</b>, {{payment.loan.filial.name}} filiali buxgalteri, tasdiqlayman ki,</p>
+        <p><b>{{payment.loan.client.full_name}}</b> tomonidan quyidagi miqdorda to‘lov qabul qilindi:</p>
+    </div>
+
+    <!-- Amount -->
+    <div class="amount-box">
+        <div class="label">To‘lov summasi:</div>
+        <div class="value">{{payment.amount|intcomma}} so'm</div>
+    </div>
+
+    <!-- Amount in words -->
+    <div class="words">
+        {{payment.amount|intcomma}} so'm
+    </div>
+
+    <!-- Payment Details -->
+    <div class="section">
+        <p><b>Kredit №:</b> {{payment.loan.contract_id}}</p>
+        <p><b>Mahsulot:</b> {{payment.loan.product.name}}</p>
+        <p><b>Filial:</b> {{user.filial.name}}</p>
+    </div>
+
+    <!-- Signature Lines -->
+    <div class="signatures">
+        <div class="sign">
+            <div class="line"></div>
+            <span>Buxgalter imzo</span>
+        </div>
+        <div class="sign">
+            <div class="line"></div>
+            <span>Mijoz imzo</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Info Panel -->
+<div class="info-panel">
+    <button onclick="document.querySelector('.cheque').setAttribute('contenteditable','true')">O'zgartirish</button>
+    <button onclick="window.print()">Chiqarish</button>
+</div>
+
+</body>
+</html>

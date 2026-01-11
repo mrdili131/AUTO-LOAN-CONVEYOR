@@ -7,31 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlowFin</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-    --primary:#0f6b3d;
-    --bg:#f4f6f8;
-    --card-bg:#fff;
-    --border:#dcdfe4;
-}
-*{box-sizing:border-box;font-family:Inter;margin:0;padding:0}
-body{background:var(--bg)}
-nav{background:var(--primary);color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
-nav h1 a{color:#fff;text-decoration:none}
-nav select{padding:8px;border-radius:8px;border:none;font-size:14px;cursor:pointer}
-nav a.user{color:#fff;text-decoration:none;font-weight:500}
-.main{padding:24px}
-.card{background:var(--card-bg);padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,0.05);margin-bottom:20px}
-.search-bar{margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap}
-.search-bar input{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border)}
-.search-bar button{padding:10px 20px;background:var(--primary);color:#fff;border:none;border-radius:12px;cursor:pointer}
-table{width:100%;border-collapse:collapse}
-th,td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--border)}
-th{background:#f0f0f0;color:#333}
-tr:hover{background:#eef2f3}
-.view-btn{padding:6px 12px;background:#0f6b3d;color:#fff;border:none;border-radius:8px;cursor:pointer}
-.no-data{text-align:center;color:#555;padding:20px}
-</style>
+<link rel="stylesheet" href="{% static 'css/creditor/history.css' %}">
+<link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
 </head>
 <body>
 

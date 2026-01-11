@@ -8,9 +8,18 @@ roles = (
     ('admin','Admin')
 )
 
+class Company(models.Model):
+    name = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
 class Filial(models.Model):
+    company = models.ForeignKey(Company,on_delete=models.CASCADE,null=True,blank=True)
     name = models.CharField(max_length=50)
     manager = models.CharField(max_length=50,default="")
+    accountant = models.CharField(max_length=50,default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

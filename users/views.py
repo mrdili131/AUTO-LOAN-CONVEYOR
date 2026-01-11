@@ -19,7 +19,12 @@ class LoginView(View):
             if user is not None:
                 login(request,user)
                 print("[LOGGER] Logged in")
-                return redirect('home')
+                if user.role == 'creditor':
+                    return redirect('home')
+                elif user.role == 'accountant':
+                    return redirect('accounting:home')
+                else:
+                    return redirect('home')
             else:
                 print("[LOGGER] Error in loggin in")
                 return redirect('auth:login')

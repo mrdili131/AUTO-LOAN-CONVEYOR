@@ -1,3 +1,4 @@
+{% load static %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,7 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlowFin</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/creditor/konveyer.css' %}">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
 </head>
 <body>
 
@@ -233,12 +236,14 @@
 <section class="tab">
 <h2>Hujjatlar</h2>
 <div class="card">
-    <div class="doc">Ariza <a href="{% url 'document' loan.id 'request' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
-    <div class="doc">Rozilik xati <a href="{% url 'document' loan.id 'agreement' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
-    <div class="doc">Axborot varaqasi <a href="{% url 'document' loan.id 'information' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
-    <div class="doc">Shartnoma <a href="{% url 'document' loan.id 'contract' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
-    <div class="doc">To'lov grafigi <a href="{% url 'document' loan.id 'graphic' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
-    <div class="doc">Farmoyish <a href="{% url 'document' loan.id 'order' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
+    <div class="doc">Ariza <a href="{% url 'document' loan.id 'request' %}" id="to_pdf" class="primary">CHIQARISH</a></div><hr>
+    <div class="doc">Rozilik xati <a href="{% url 'document' loan.id 'agreement' %}" id="to_pdf" class="primary">CHIQARISH</a></div><hr>
+    <div class="doc">Axborot varaqasi <a href="{% url 'document' loan.id 'information' %}" id="to_pdf" class="primary">CHIQARISH</a></div><hr>
+    <div class="doc">Shartnoma <a href="{% url 'document' loan.id 'contract' %}" id="to_pdf" class="primary">CHIQARISH</a></div><hr>
+    <div class="doc">To'lov grafigi <a href="{% url 'document' loan.id 'graphic' %}" id="to_pdf" class="primary">CHIQARISH</a></div><hr>
+    <div class="doc">Farmoyish <a href="{% url 'document' loan.id 'order' %}" id="to_pdf" class="primary">CHIQARISH</a></div><hr>
+    <div class="doc">Kuzatuv <a href="{% url 'document' loan.id 'kuzatuv' %}" id="to_pdf" class="primary">CHIQARISH</a></div><hr>
+    <div class="doc">Betlik <a href="{% url 'document' loan.id 'betlik' %}" id="to_pdf" class="primary">CHIQARISH</a></div>
 </div>
 </section>
 
@@ -264,312 +269,8 @@
 </footer>
 
 <!-- ================= JS ================= -->
-<script>
+<script src="{% static 'js/creditor/konveyer.js' %}"></script>
 
-    if ("{{loan.status}}" === "rejected" || "{{loan.status}}" === "done" || "{{loan.status}}" === "approved" || "{{loan.status}}" === "paid"){
-        document.querySelectorAll('.tab').forEach(f=>{
-            f.querySelectorAll('input,select,button').forEach(i=>{
-                if(
-                    i.id !== "make_graphic" &&
-                    i.id !== "to_pdf"
-                )
-            i.disabled = true;
-            i.readOnly = true;
-            })
-        })
-    }
-
-function send_data(){
-    let inputs = document.querySelectorAll("input, select")
-    let data = {}
-    inputs.forEach((i,index)=>{
-        data[i.id] = i.value;
-    })
-    $.ajax({
-        url: "{% url 'save_data' %}",
-        method: "POST",
-        headers: {
-            "X-CSRFToken": document.getElementById("csrf_token").value
-        },
-        data: {
-            data: JSON.stringify(data),
-            id: "{{loan.id}}"
-        },
-        success: function( result ) {
-            
-        }
-    });
-    console.log(data)
-}
-
-function save_product(){
-    send_data();
-    setTimeout(()=>{
-        window.location.reload()
-    },100)
-}
-
-
-function add_client(){
-    let pinfl = document.getElementById("client_pinfl").value
-    console.log("searching for client")
-    $.ajax({
-        url: "{% url 'add_client' %}",
-        method: "POST",
-        headers: {
-            "X-CSRFToken": document.getElementById("csrf_token").value
-        },
-        data: {
-            pinfl: pinfl,
-            id: "{{loan.id}}"
-        },
-        success: function( result ) {
-            if (result.status === true){
-                spawnAlert('Mijoz topildi','success')
-                setTimeout(()=>{
-                    window.location.reload()
-                },1000)
-            } else {
-                spawnAlert('Mijoz topilmadi','error')
-            }
-        }
-    });
-}
-
-function save_number(){
-    let number = document.getElementById("new_number").value
-    let desc = document.getElementById("new_number_comment").value
-    if (number && desc)
-    {
-        $.ajax({
-            url: "{% url 'save_number' %}",
-            method: "POST",
-            headers: {
-                "X-CSRFToken": document.getElementById("csrf_token").value
-            },
-            data: {
-                loan: "{{loan.id}}",
-                number: number,
-                desc: desc
-            },
-            success: function( result ) {
-                if (result.status === true){
-                    console.log(result.number)
-                    spawnAlert("Raqam saqlandi",'success')
-                    numbers_list = document.querySelector(".number_list")
-                    numbers_list.innerHTML = ''
-                    Object.entries(result.numbers).forEach(([name,number])=>{
-                        numbers_list.innerHTML += `
-                        <div class="doc">
-                            <span>📞 ${number}</span>
-                            <span>${name}</span>
-                            <button class="danger" onclick="deleteItem(this)">O‘chirish</button>
-                        </div>
-                        `
-                    })
-                    document.getElementById("new_number").value = "";
-                    document.getElementById("new_number_comment").value = "";
-                } else {
-                    spawnAlert('Raqam saqlashda xatolik','error')
-                }
-            }
-        });
-    }
-    
-}
-
-function delete_number(el){
-    fetch(`/delete_number/${el.id}/`, { method: 'POST', 
-        headers: {
-            "X-CSRFToken": document.getElementById("csrf_token").value
-        }
-    })
-    document.querySelector(`.number_${el.id}`).remove()
-}
-
-function reject(){
-    $.ajax({
-        url: "{% url 'reject' %}",
-        method: "POST",
-        headers: {
-            "X-CSRFToken": document.getElementById("csrf_token").value
-        },
-        data: {
-            id: "{{loan.id}}"
-        },
-        success: function( result ) {
-            if (result.status === true){
-                spawnAlert(result.msg,'success')
-            } else {
-                spawnAlert(result.msg,'error')
-            }
-        }
-    });
-}
-
-function approve(){
-        $.ajax({
-            url: "{% url 'approve' %}",
-            method: "POST",
-            headers: {
-                "X-CSRFToken": document.getElementById("csrf_token").value
-            },
-            data: {
-                loan_id: "{{loan.id}}"
-            },
-            success: function( result ) {
-                if (result.status === true){
-                    spawnAlert(result.msg,'success')
-                } else {
-                    spawnAlert(result.msg,'error')
-                }
-            }
-        });
-    }
-
-
-
-// ===== TAB LOGIC WITH URL & LOCALSTORAGE =====
-let tabs = document.querySelectorAll(".tab");
-let steps = document.querySelectorAll(".step");
-let current = 0;
-
-// Read ?tab= or localStorage
-const url = new URL(window.location);
-const page = url.searchParams.get("tab");
-if(page && !isNaN(page) && page>=0 && page<tabs.length){
-    current = Number(page);
-}
-
-function showTab(i){
-    tabs.forEach(t=>t.classList.remove("active"));
-    steps.forEach(s=>s.classList.remove("active"));
-    tabs[i].classList.add("active");
-    steps[i].classList.add("active");
-    current = i;
-
-    // Update URL and localStorage
-    url.searchParams.set("tab",i);
-    window.history.replaceState({}, "", url);
-    send_data()
-}
-function nextTab(){ if(current < tabs.length-1) showTab(current+1); }
-function prevTab(){ if(current > 0) showTab(current-1); }
-steps.forEach((s,i)=>s.onclick=()=>showTab(i));
-
-// Initialize
-showTab(current);
-
-// ===== ALERT SYSTEM =====
-function spawnAlert(text,type='info'){
-    const a=document.createElement("div");
-    a.className="alert "+type;
-    a.innerText=text;
-    document.getElementById("alerts").appendChild(a);
-    setTimeout(()=>a.classList.add("hide"),2500);
-    setTimeout(()=>a.remove(),3000);
-}
-
-// ===== MONTHLY PAYMENT CALCULATION =====
-function calculateMonthlyPayment(){
-    const principal = parseFloat(document.getElementById("price").value);
-    const rateYear  = parseFloat(document.getElementById("loan_rate").value);
-    const startStr  = document.getElementById("loan_start_date").value;
-    const endStr    = document.getElementById("loan_end_date").value;
-    const payday    = parseInt(document.getElementById("payday").value);
-
-    if(!principal || !rateYear || !startStr || !endStr || !payday) return;
-
-    const start = new Date(startStr);
-    const end   = new Date(endStr);
-
-    if(end <= start) return;
-
-    // ===== TOTAL WITH INTEREST (simple yearly) =====
-    const total = principal + (principal * rateYear / 100);
-
-    // ===== COUNT REAL PAYMENT DATES =====
-    let count = 0;
-    let cursor = new Date(start.getFullYear(), start.getMonth(), 1);
-
-    while(cursor <= end){
-        const year = cursor.getFullYear();
-        const month = cursor.getMonth();
-
-        // last day of month (Feb, 30/31 handled)
-        const lastDay = new Date(year, month + 1, 0).getDate();
-        const day = Math.min(payday, lastDay);
-
-        const dueDate = new Date(year, month, day);
-
-        if(dueDate >= start && dueDate <= end){
-            count++;
-        }
-
-        cursor.setMonth(cursor.getMonth() + 1);
-    }
-
-    if(count === 0) return;
-
-    const monthly = total / count;
-
-    // ===== UI UPDATE =====
-    document.getElementById("monthly_payment").value =
-        Math.round(monthly).toLocaleString("ru-RU") + " so‘m";
-
-    document.getElementById("confirm_monthly").innerText =
-        Math.round(monthly).toLocaleString("ru-RU") + " so‘m";
-
-    // (optional) save hidden values for backend
-    window._lkrd_payment_count = count;
-    window._lkrd_total_amount = Math.round(total);
-}
-
-
-document.getElementById("loan_end_date").addEventListener("change", calculateMonthlyPayment);
-document.getElementById("loan_rate").addEventListener("input", calculateMonthlyPayment);
-document.getElementById("payday").addEventListener("input", calculateMonthlyPayment);
-window.onload = calculateMonthlyPayment;
-
-
-
-
-
-</script>
-
-<!-- ================= CSS ================= -->
-<style>
-:root{--p:#0f6b3d;--bg:#f4f6f8;--bd:#dcdfe4}
-*{box-sizing:border-box;font-family:Inter}
-body{margin:0;background:var(--bg)}
-.topbar{background:linear-gradient(135deg,#0f6b3d,#094a29);color:#fff;padding:16px 24px;display:flex;justify-content:space-between}
-.subtitle{font-size:13px;opacity:.85}
-.steps{display:flex;gap:8px;background:#fff;padding:10px;border-bottom:1px solid var(--bd)}
-.step{flex:1;padding:10px;border-radius:10px;border:1px solid var(--bd);cursor:pointer;text-align:center;font-size:14px}
-.step.active{background:var(--p);color:#fff}
-.container{padding:24px}
-.tab{display:none}
-.tab.active{display:block}
-.card{background:#fff;border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:20px}
-.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
-.field{display:flex;flex-direction:column;gap:6px}
-input,select{padding:10px;border-radius:10px;border:1px solid var(--bd)}
-.footer-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--bd);padding:12px 24px;display:flex;justify-content:space-between}
-.primary{background:var(--p);color:#fff;border:none;padding:10px 18px;border-radius:12px;cursor:pointer}
-.danger{background:#b91c1c;color:#fff;border:none;padding:10px 18px;border-radius:12px;cursor:pointer}
-.ghost{background:#eef2f3;border:1px solid var(--bd);padding:10px 18px;border-radius:12px;cursor:pointer}
-.large{font-size:18px;padding:14px 26px}
-.doc{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.end{text-align:center}
-#alerts{position:fixed;top:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:999}
-.alert{padding:12px 16px;border-radius:12px;color:#fff;min-width:220px;animation:slide .3s}
-.alert.success{background:#16a34a}
-.alert.info{background:#2563eb}
-.alert.error{background:#dc2626}
-.alert.hide{opacity:0;transform:translateX(50px);transition:.3s}
-@keyframes slide{from{opacity:0;transform:translateX(50px)}to{opacity:1}}
-</style>
 
 </body>
 </html>

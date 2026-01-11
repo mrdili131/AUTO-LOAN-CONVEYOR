@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from krd.models import Loan, Product, PaymentMonth
+from krd.models import Loan, Product, PaymentMonth, Payment
 from django.http.response import JsonResponse
 from .models import AccountedLoan
 from django.utils.decorators import method_decorator
@@ -44,22 +44,26 @@ class ReportView(LoginRequiredMixin,View):
         start_date = request.GET.get("start_date", str(timezone.now().date()))
         end_date = request.GET.get("end_date", str(timezone.now().date()))
         contract_id = request.GET.get("contract_id", "").strip()
-        payments = PaymentMonth.objects.filter(loan__filial = request.user.filial).filter(
-            Q(loan__contract_id=contract_id)
-        )
+
         try:
             start_date_valid = datetime.strptime(start_date, "%Y-%m-%d").date()
             end_date_valid = datetime.strptime(end_date, "%Y-%m-%d").date()
         except ValueError:
             start_date_valid = timezone.now().date()
             end_date_valid = timezone.now().date()
+        print(start_date_valid)
+        print(end_date_valid)
+
+        payments = PaymentMonth.objects.filter(loan__filial = request.user.filial).filter(
+            Q(loan__contract_id__icontains=contract_id)
+        )
 
         if (start_date_valid and end_date_valid):
             payments = payments.filter(
                 payment_date__gte=start_date_valid,
                 payment_date__lte=end_date_valid
             )
-        payments = payments.order_by("-id")
+        payments = payments.order_by("-payment_date")
         return render(request,'accounting/report.html',{"payments":payments,"start_date":start_date,"end_date":end_date,"contract_id":contract_id})  
     
 @role_required('accountant')
@@ -67,6 +71,17 @@ def document(request,id,doct):
     loan = Loan.objects.get(id=id)
     if (doct and doct == "accounting_cheque"):
         return render(request,'accounting/accounting_cheque.html',{"loan":loan})
+    
+@role_required('accountant')
+def payment_history(request,contract_id):
+    loan = Loan.objects.get(contract_id=contract_id)
+    payments = Payment.objects.filter(loan__contract_id=contract_id).order_by("-id")
+    return render(request,'accounting/payment_history.html',{"loan":loan,"payments":payments})
+
+@role_required('accountant')
+def payment_cheque(request,id):
+    payment = Payment.objects.get(id=id)
+    return render(request,'accounting/payment_cheque.html',{"payment":payment})
     
 
 @login_required

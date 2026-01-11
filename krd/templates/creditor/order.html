@@ -1,3 +1,4 @@
+{% load static %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
@@ -5,6 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Farmoyish</title>
+<link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
 </head>
 <body>
 
@@ -39,15 +41,19 @@
             </ul>
         </div>
 
-        <div class="signature" style="margin-top:100px; display:flex; justify-content:space-between;">
+        <div class="signature" style="margin-top:50px; display:flex; justify-content:space-between;">
             <div>
                 <p>Boshqaruvchi: ____________________</p>
                 <p>{{loan.filial.manager}}</p>
             </div>
+        </div>
+        <div class="signature" style="margin-top:30px; display:flex; justify-content:space-between;">
             <div>
                 <p>Buxgalter: ____________________</p>
-                <p>{{user.full_name}}</p>
+                <p>{{loan.filial.accountant}}</p>
             </div>
+        </div>
+        <div class="signature" style="margin-top:30px; display:flex; justify-content:space-between;">
             <div>
                 <p>Kredit mutaxasisi: ____________________</p>
                 <p>{{user.full_name}}</p>

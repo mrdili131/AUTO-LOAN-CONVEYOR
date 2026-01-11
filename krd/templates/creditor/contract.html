@@ -1,3 +1,4 @@
+{% load static %}
 {% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
@@ -5,6 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kredit Shartnomasi</title>
+<link rel="icon" href="{% static 'img/icon.ico' %}" type="image/x-icon">
 </head>
 <body>
 
@@ -17,7 +19,7 @@
         <div class="section">
             <h3>1. Tomonlar</h3>
             <p>
-                1.1. Kredit beruvchi: "DIZENSTUDIOS" MCHJ, {{loan.filial.name}} filiali boshqaruvchisi {{loan.filial.manager}}<br>
+                1.1. Kredit beruvchi: {{loan.filial.company.name}}, {{loan.filial.name}} filiali boshqaruvchisi {{loan.filial.manager}}<br>
                 1.2. Kredit oluvchi: {{loan.client.full_name}}, JSHSHIR: {{loan.client.passport_pinfl}}, telefon: {{loan.client.numbers.all.0.number}}, manzil: {{loan.client.current_address}}.
             </p>
         </div>
@@ -38,6 +40,7 @@
             <p>
                 Kredit oluvchi har oy to‘lovlarni **grafikda ko‘rsatilgan tartibda** amalga oshiradi.  
                 Oylik to‘lov summasi <b>{{loan.payment|intcomma}} so'm</b> bo‘lib, belgilangan muddatda to‘lanadi.
+                Oylik to‘lovning har kechiktirilgan kuni uchun oylik to‘lovni <b>{{loan.fine}}%</b> fozi <b>peniya</b> tarzida qo‘shiladi.
             </p>
         </div>
 

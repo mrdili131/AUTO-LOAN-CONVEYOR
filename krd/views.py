@@ -56,6 +56,10 @@ def document(request,id,doct):
         return render(request,"creditor/contract.html",{"loan":loan})
     elif (doct and doct == "order"):
         return render(request,"creditor/order.html",{"loan":loan})
+    elif (doct and doct == "betlik"):
+        return render(request,"creditor/betlik.html",{"loan":loan})
+    elif (doct and doct == "kuzatuv"):
+        return render(request,"creditor/kuzatuv.html",{"loan":loan})
     else:
         return redirect('home')
 

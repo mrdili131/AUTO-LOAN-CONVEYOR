@@ -68,6 +68,7 @@ class Product(models.Model):
 
     def __str__(self):
         return f"{self.name} | {self.price} so'm"
+        
     
 class Loan(models.Model):
     # Linkings
@@ -128,6 +129,12 @@ class Loan(models.Model):
         super().save(*args,**kwargs)
 
     def pay(self,payment_amount):
+        if payment_amount > self.total_amount:
+            payment_amount = self.total_amount
+            self.status = 'paid'
+            self.save()
+            Payment(loan=self,amount=payment_amount).save()
+            return payment_amount
         left = payment_amount
         months = self.payment_months.order_by("month")
         for i in months:
@@ -146,10 +153,12 @@ class Loan(models.Model):
                 i.is_paid = True
                 i.paid_date = now().date()
             i.save()
+        Payment(loan=self,amount=payment_amount).save()
         return payment_amount - left
 
     def __str__(self):
         return f"ID: {self.id} | At: {self.created_at.ctime()}"
+        
     
 
 class PaymentMonth(models.Model):
@@ -161,7 +170,7 @@ class PaymentMonth(models.Model):
     paid_amount = models.DecimalField(max_digits=10,decimal_places=0,default=0)
     is_paid = models.BooleanField(default=False,null=True,blank=True)
     payment_date = models.DateField(null=True,blank=True)
-    paid_date = models.DateField(null=True,blank=True)
+    paid_date = models.DateTimeField(auto_now_add=True,null=True,blank=True)
 
     @property
     def left_amount(self):
@@ -178,6 +187,12 @@ class PaymentMonth(models.Model):
 
     def __str__(self):
         return f'{self.loan.contract_id}\'s {self.month}th payment = {self.payment}'
+    
+class Payment(models.Model):
+    loan = models.ForeignKey(Loan,on_delete=models.SET_NULL,null=True,blank=True,related_name="payments")
+    amount = models.DecimalField(max_digits=10,decimal_places=0,default=0)
+    paid_date = models.DateField(auto_now_add=True,null=True,blank=True)
+
 
 
 class PhoneNumber(models.Model):

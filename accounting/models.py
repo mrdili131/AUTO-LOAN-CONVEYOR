@@ -7,3 +7,6 @@ class AccountedLoan(models.Model):
     loan = models.ForeignKey(Loan,on_delete=models.CASCADE)
     filial = models.ForeignKey(Filial,on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user.full_name} approved {self.loan.contract_id} at {self.created_at.ctime()}'
